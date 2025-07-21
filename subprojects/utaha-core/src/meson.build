@@ -5,6 +5,6 @@ sources = files(
   'status.vala',
   'storage.vala',
   'task.vala',
-  'tomlable.vala',
+  'jsonable.vala',
   'wrapper.vala',
 )

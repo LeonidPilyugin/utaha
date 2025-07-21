@@ -1,6 +1,3 @@
-using Utaha.Core;
-using Toml;
-
 namespace Utaha.ScreenBackend
 {
     public sealed class BackendHealthReport : Utaha.Core.BackendHealthReport
@@ -58,32 +55,29 @@ namespace Utaha.ScreenBackend
             return new BackendHealthReport();
         }
 
-        public override void _submit(Id id, string[] command)
-            throws BackendError
+        public override void _submit(Utaha.Core.Id id, string[] command) throws Utaha.Core.BackendError
         {
             try
             {
                 screen.submit(id.uuid, command);
             } catch (ScreenError e)
             {
-                throw new BackendError.ERROR(@"Failed to submit process: $(e.message)");
+                throw new Utaha.Core.BackendError.ERROR(@"Failed to submit process: $(e.message)");
             }
         }
 
-        public override void _cancel(Id id)
-            throws BackendError
+        public override void _cancel(Utaha.Core.Id id) throws Utaha.Core.BackendError
         {
             try
             {
                 screen.cancel(id.uuid);
             } catch (ScreenError e)
             {
-                throw new BackendError.ERROR(@"Failed to cancel process: $(e.message)");
+                throw new Utaha.Core.BackendError.ERROR(@"Failed to cancel process: $(e.message)");
             }
         }
 
-        public override Utaha.Core.BackendStatus status(Id id)
-            throws BackendError
+        public override Utaha.Core.BackendStatus status(Utaha.Core.Id id) throws Utaha.Core.BackendError
         {
             Session? session;
             try
@@ -91,13 +85,13 @@ namespace Utaha.ScreenBackend
                 session = screen.find_session(id.uuid);
             } catch (ScreenError e)
             {
-                throw new BackendError.ERROR(@"Falied to find session: $(e.message)");
+                throw new Utaha.Core.BackendError.ERROR(@"Falied to find session: $(e.message)");
             }
 
             return new BackendStatus(session.pid != null, session.pid);
         }
 
-        protected override void init_toml(Element element) throws TomlableError { }
+        protected override void init_json(Json.Object object) throws Utaha.Core.JsonableError { }
     }
 }
 

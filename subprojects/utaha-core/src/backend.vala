@@ -1,5 +1,3 @@
-using Toml;
-
 namespace Utaha.Core
 {
     public errordomain BackendError
@@ -7,7 +5,7 @@ namespace Utaha.Core
         ERROR,
     }
 
-    public abstract class Backend : Serializable, ITomlable
+    public abstract class Backend : Serializable, IJsonable
     {
         public abstract BackendHealthReport healthcheck();
 
@@ -32,7 +30,7 @@ namespace Utaha.Core
 
         public abstract BackendStatus status(Id id) throws BackendError;
 
-        protected abstract void init_toml(Element element) throws TomlableError;
+        protected abstract void init_json(Json.Object object) throws JsonableError;
     }
 
     public abstract class BackendHealthReport : Status

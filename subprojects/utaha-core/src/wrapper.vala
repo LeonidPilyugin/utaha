@@ -1,8 +1,6 @@
-using Toml;
-
 namespace Utaha.Core
 {
-    public abstract class Wrapper : Serializable, ITomlable
+    public abstract class Wrapper : Serializable, IJsonable
     {
         [CCode (has_target = false)]
         public delegate void SignalHandlerMethod (Wrapper wrapper, ProcessSignal signal);
@@ -17,7 +15,7 @@ namespace Utaha.Core
 
         public abstract HashTable<ProcessSignal, SignalHandlerMethod> get_signal_handlers();
 
-        protected abstract void init_toml(Element element) throws TomlableError;
+        protected abstract void init_json(Json.Object object) throws JsonableError;
     }
 
     [Immutable]

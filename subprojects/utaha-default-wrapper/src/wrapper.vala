@@ -1,6 +1,3 @@
-using Utaha.Core;
-using Toml;
-
 namespace Utaha.DefaultWrapper
 {
     public sealed class WrapperStatus : Utaha.Core.WrapperStatus
@@ -27,84 +24,85 @@ namespace Utaha.DefaultWrapper
         private SubprocessLauncher launcher = null;
         private Subprocess process = null;
 
-        protected override void init_toml(Element element) throws TomlableError
+        protected override void init_json(Json.Object object) throws Utaha.Core.JsonableError
         {
-            var command = element["command"].as_array();
-            this.command = new string[command.size];
+            if (!object.has_member("command"))
+                throw new Utaha.Core.JsonableError.ERROR(@"Does not have \"command\" member");
+            if (object.get_member("command").get_node_type() != Json.NodeType.ARRAY)
+                throw new Utaha.Core.JsonableError.ERROR(@"Member \"command\" is not an array");
 
-            for (int i = 0; i < command.size; i++)
-                this.command[i] = command.get(i).as<string>();
+            var command = object.get_array_member("command");
+            this.command = new string[command.get_length()];
+
+            for (uint i = 0; i < command.get_length(); i++)
+                this.command[i] = command.get_string_element(i);
 
             last_active = null;
         }
 
-        public override void init() throws SerializationError
+        public override void init() throws Utaha.Core.SerializationError
         {
             base.init();
             try
             {
-                node.touch_file("wrapper.toml");
+                node.touch_file("wrapper.json");
                 node.touch_file("stdout");
                 node.touch_file("stderr");
-            } catch (StorageNodeError e)
+            } catch (Utaha.Core.StorageNodeError e)
             {
-                throw new SerializationError.STORAGE_ERROR(
+                throw new Utaha.Core.SerializationError.STORAGE_ERROR(
                     @"Could not initialize storage node: $(e.message)"
                 );
             }
         }
 
-        public override void load() throws SerializationError
+        public override void load() throws Utaha.Core.SerializationError
         {
             try
             {
-                Element doc = new Parser(node.read_file("wrapper.toml")).parse();
-                init_toml(doc);
+                var parser = new Json.Parser();
+                parser.load_from_data(node.read_file("wrapper.json"));
+                init_json(parser.get_root().get_object());
                 launcher = new SubprocessLauncher(GLib.SubprocessFlags.NONE);
                 launcher.set_environ(Environ.get());
                 launcher.set_stdout_file_path(node.build("stdout"));
                 launcher.set_stderr_file_path(node.build("stderr"));
-            } catch (StorageNodeError e)
+            } catch (Utaha.Core.StorageNodeError e)
             {
-                throw new SerializationError.STORAGE_ERROR(
-                    @"Could not load: $(e.message)"
-                );
-            } catch (TomlableError e)
+                throw new Utaha.Core.SerializationError.STORAGE_ERROR(e.message);
+            } catch (Utaha.Core.JsonableError e)
             {
-                throw new SerializationError.ERROR(
-                    @"TOML error: $(e.message)"
-                );
+                throw new Utaha.Core.SerializationError.ERROR(e.message);
             } catch (Error e)
             {
-                throw new SerializationError.ERROR(
-                    @"Error: $(e.message)"
-                );
+                throw new Utaha.Core.SerializationError.ERROR(e.message);
             }
         }
 
-        public override void dump() throws SerializationError
+        public override void dump() throws Utaha.Core.SerializationError
         {
             try
             {
-                Writer writer = new Writer();
-                Element doc = new Element.table();
-                var arr = new Gee.ArrayList<Element>();
+                Json.Builder builder = new Json.Builder();
+                builder.begin_object();
 
-                for (int i = 0; i < command.length; i++)
-                    arr.insert(i, new Element(command[i]));
-                var ar = new Element.array(arr);
-                ar.inline = true;
-                doc["command"] = ar;
-                node.write_file("wrapper.toml", writer.write(doc));
-            } catch (StorageNodeError e)
+                builder.set_member_name("command");
+                builder.begin_array();
+                foreach (unowned string str in command)
+                    builder.add_string_value(str);
+                builder.end_array();
+
+                builder.end_object();
+
+                Json.Generator generator = new Json.Generator();
+                Json.Node root = builder.get_root();
+                generator.set_root(root);
+
+                node.write_file("wrapper.json", generator.to_data(null));
+            } catch (Utaha.Core.StorageNodeError e)
             {
-                throw new SerializationError.STORAGE_ERROR(
+                throw new Utaha.Core.SerializationError.STORAGE_ERROR(
                     @"Could not dump: $(e.message)"
-                );
-            } catch (TomlError e)
-            {
-                throw new SerializationError.ERROR(
-                    @"TOML error: $(e.message)"
                 );
             }
         }
@@ -118,8 +116,6 @@ namespace Utaha.DefaultWrapper
 
         public override void start()
         {
-            // string arr[1];
-            // arr[0] = command;
             process = launcher.spawnv(command);
         }
 

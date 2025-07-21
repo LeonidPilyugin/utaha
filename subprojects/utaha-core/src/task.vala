@@ -1,8 +1,6 @@
-using Toml;
-
 namespace Utaha.Core
 {
-    public sealed class TaskData : Serializable, ITomlable
+    public sealed class TaskData : Serializable, IJsonable
     {
         public Id id { get; private set; }
         public string alias { get; private set; }
@@ -20,7 +18,7 @@ namespace Utaha.Core
             base.init();
             try
             {
-                node.touch_file("taskdata.toml");
+                node.touch_file("taskdata.json");
             } catch (StorageNodeError e)
             {
                 throw new SerializationError.STORAGE_ERROR(
@@ -33,25 +31,19 @@ namespace Utaha.Core
         {
             try
             {
-                Element doc = new Parser(node.read_file("taskdata.toml")).parse();
-                id = Id.from_string(doc["id"].as<string>());
-                alias = doc["alias"].as<string>();
-                comment = doc["comment"].as<string>();
+                var parser = new Json.Parser();
+                parser.load_from_data(node.read_file("taskdata.json"));
+                var object = parser.get_root().get_object();
+                init_json(object);
+                if (!object.has_member("id"))
+                    throw new SerializationError.ERROR("Corrupted taskdata.json");
+                id = Id.from_string(object.get_string_member("id"));
             } catch (StorageNodeError e)
             {
-                throw new SerializationError.STORAGE_ERROR(
-                    @"Could not load: $(e.message)"
-                );
-            } catch (TomlError e)
-            {
-                throw new SerializationError.ERROR(
-                    @"TOML error: $(e.message)"
-                );
+                throw new SerializationError.STORAGE_ERROR(e.message);
             } catch (Error e)
             {
-                throw new SerializationError.ERROR(
-                    @"Error: $(e.message)"
-                );
+                throw new SerializationError.ERROR(e.message);
             }
         }
 
@@ -59,42 +51,48 @@ namespace Utaha.Core
         {
             try
             {
-                Writer writer = new Writer();
+                Json.Builder builder = new Json.Builder();
+                builder.begin_object();
 
-                Element doc = new Element.table();
-                doc["id"] = new Element(id.uuid);
-                doc["alias"] = new Element(alias);
-                doc["comment"] = new Element(comment);
+                builder.set_member_name("id");
+                builder.add_string_value(id.uuid);
 
-                node.write_file("taskdata.toml", writer.write(doc));
+                builder.set_member_name("alias");
+                builder.add_string_value(alias);
+
+                builder.set_member_name("comment");
+                builder.add_string_value(comment);
+
+                builder.end_object();
+
+                Json.Generator generator = new Json.Generator();
+                Json.Node root = builder.get_root();
+                generator.set_root(root);
+
+                node.write_file("taskdata.json", generator.to_data(null));
             } catch (StorageNodeError e)
             {
                 throw new SerializationError.STORAGE_ERROR(
                     @"Could not dump: $(e.message)"
                 );
-            } catch (TomlError e)
-            {
-                throw new SerializationError.ERROR(
-                    @"TOML error: $(e.message)"
-                );
             }
         }
 
-        protected override void init_toml(Element element) throws TomlableError
+        protected override void init_json(Json.Object object) throws JsonableError
         {
-            try
-            {
-                id = Id.generate();
-                alias = element["alias"].as<string>();
-                comment = element["comment"].as<string>();
-            } catch (TomlError e)
-            {
-                throw new TomlableError.TOML_ERROR(e.message);
-            }
+            id = Id.generate();
+
+            if (!object.has_member("alias"))
+                throw new JsonableError.ERROR("Does not have \"alias\" member");
+            if (!object.has_member("comment"))
+                throw new JsonableError.ERROR("Does not have \"comment\" member");
+
+            alias = object.get_string_member("alias");
+            comment = object.get_string_member("comment");
         }
     }
 
-    public sealed class Task : Serializable, ITomlable
+    public sealed class Task : Serializable, IJsonable
     {
         public TaskData taskdata { get; private set; }
         public Backend backend { get; private set; }
@@ -178,17 +176,19 @@ namespace Utaha.Core
             return new TaskStatus(taskdata, backend.status(taskdata.id), wrapper.status());
         }
 
-        protected void init_toml(Element element) throws TomlableError
+        protected void init_json(Json.Object object) throws JsonableError
         {
-            try
+            string[] members = { "taskdata", "backend", "wrapper" };
+            foreach (unowned string member in members)
             {
-                taskdata = ITomlable.load_toml<TaskData>(element["taskdata"]);
-                backend = ITomlable.load_toml<Backend>(element["backend"]);
-                wrapper = ITomlable.load_toml<Wrapper>(element["wrapper"]);
-            } catch (TomlError e)
-            {
-                throw new TomlableError.TOML_ERROR(e.message);
+                if (!object.has_member(member))
+                    throw new JsonableError.ERROR(@"Does not have \"$member\" member");
+                if (object.get_member(member).get_node_type() != Json.NodeType.OBJECT)
+                    throw new JsonableError.ERROR(@"Member \"$member\" does not contain object");
             }
+            taskdata = IJsonable.load_json<TaskData>(object.get_member("taskdata").get_object());
+            backend = IJsonable.load_json<Backend>(object.get_member("backend").get_object());
+            wrapper = IJsonable.load_json<Wrapper>(object.get_member("wrapper").get_object());
         }
     }
 

@@ -14,7 +14,8 @@ dependencies = [
   dependency('gobject-2.0'),
   dependency('gio-2.0'),
   dependency('gmodule-2.0'),
-  subproject('toml-glib').get_variable('toml'),
+  dependency('json-glib-1.0'),
+  # subproject('toml-glib').get_variable('toml'),
 ]
 
 subdir('src')
