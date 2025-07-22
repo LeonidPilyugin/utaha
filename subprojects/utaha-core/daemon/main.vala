@@ -1,7 +1,8 @@
-errordomain HandlerError
+errordomain Error
 {
     ERROR,
 }
+
 
 static MainLoop loop = null;
 static Utaha.Core.Task task = null;
@@ -16,7 +17,13 @@ static void register_signals()
 
 static bool timer_callback()
 {
-    if (task.wrapper.on_tick()) loop.quit();
+    try
+    {
+        if (task.wrapper.on_tick()) loop.quit();
+    } catch (Utaha.Core.WrapperError e)
+    {
+        error(e.message);
+    }
     return true;
 }
 
@@ -27,12 +34,21 @@ static void on_signal(int signal)
         var func = handlers.get(signal);
         func(task.wrapper, signal);
     }
-
 }
 
 static void run(Utaha.Core.Id id, int delay = 100)
 {
-    task = Utaha.Core.Storage.get_storage().get_task(id);
+    try
+    {
+        task = Utaha.Core.Storage.get_storage().get_task(id);
+    } catch (Utaha.Core.StorageNodeError e)
+    {
+        error(e.message);
+    } catch (Utaha.Core.StorableError e)
+    {
+        error(e.message);
+    }
+
     register_signals();
     loop = new MainLoop();
     var time = new TimeoutSource(delay);
@@ -51,13 +67,10 @@ static int main(string[] args)
         run(Utaha.Core.Id.from_string(args[1]));
     } catch (Utaha.Core.IdError e)
     {
-        return 1;
+        error(e.message);
     } catch (Utaha.Core.ModuleError e)
     {
-        return 1;
-    } catch (HandlerError e)
-    {
-        return 1;
+        error(e.message);
     }
 
     return 0;

@@ -1,6 +1,6 @@
 namespace Utaha.Core
 {
-    public errordomain SerializationError
+    public errordomain StorableError
     {
         TYPE_ERROR,
         STORAGE_ERROR,

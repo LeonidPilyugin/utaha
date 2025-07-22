@@ -44,33 +44,45 @@ namespace Utaha.Core
             }
         }
 
-        public List<string> list_children()
+        public List<string> list_children() throws StorageNodeError
         {
-            var result = new List<string>();
-            var enumerator = file.enumerate_children("*", FileQueryInfoFlags.NONE);
-            FileInfo? info = null;
-            while (null != (info = enumerator.next_file()))
-                result.append(info.get_name());
-            return result;
+            try
+            {
+                var result = new List<string>();
+                var enumerator = file.enumerate_children("*", FileQueryInfoFlags.NONE);
+                FileInfo? info = null;
+                while (null != (info = enumerator.next_file()))
+                    result.append(info.get_name());
+                return result;
+            } catch (Error e)
+            {
+                throw new StorageNodeError.FS_ERROR(e.message);
+            }
         }
 
-        private void remove_recursively(File file)
+        private void remove_recursively(File file) throws StorageNodeError
         {
-            var enumerator = file.enumerate_children("*", FileQueryInfoFlags.NONE);
-            FileInfo? info = null;
-
-            while (null != (info = enumerator.next_file()))
+            try
             {
-                if (info.get_file_type() == FileType.REGULAR) {
-                    file.get_child(info.get_name()).delete();
-                } else if (info.get_file_type() == FileType.DIRECTORY) {
-                    var subfolder = file.get_child(info.get_name());
-                    remove_recursively(subfolder);
-                    subfolder.delete();
-                }
-            }
+                var enumerator = file.enumerate_children("*", FileQueryInfoFlags.NONE);
+                FileInfo? info = null;
 
-            file.delete();
+                while (null != (info = enumerator.next_file()))
+                {
+                    if (info.get_file_type() == FileType.REGULAR) {
+                        file.get_child(info.get_name()).delete();
+                    } else if (info.get_file_type() == FileType.DIRECTORY) {
+                        var subfolder = file.get_child(info.get_name());
+                        remove_recursively(subfolder);
+                        subfolder.delete();
+                    }
+                }
+
+                file.delete();
+            } catch (Error e)
+            {
+                throw new StorageNodeError.FS_ERROR(e.message);
+            }
         }
 
         public void remove() throws StorageNodeError

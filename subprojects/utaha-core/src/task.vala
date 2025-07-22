@@ -1,6 +1,6 @@
 namespace Utaha.Core
 {
-    public sealed class Task : Serializable, IJsonable
+    public sealed class Task : Storable, IJsonable
     {
         public TaskData taskdata { get; private set; }
         public Backend backend { get; private set; }
@@ -27,7 +27,7 @@ namespace Utaha.Core
             }
         }
 
-        public override void init() throws SerializationError
+        public override void init() throws StorableError
         {
             base.init();
             backend.init();
@@ -35,20 +35,20 @@ namespace Utaha.Core
             taskdata.init();
         }
 
-        public override void load() throws SerializationError
+        public override void load() throws StorableError
         {
             try
             {
-                backend = Serializable.load_from<Backend>(node.subnode("backend"));
-                wrapper = Serializable.load_from<Wrapper>(node.subnode("wrapper"));
-                taskdata = Serializable.load_from<TaskData>(node.subnode("taskdata"));
+                backend = Storable.load_from<Backend>(node.subnode("backend"));
+                wrapper = Storable.load_from<Wrapper>(node.subnode("wrapper"));
+                taskdata = Storable.load_from<TaskData>(node.subnode("taskdata"));
             } catch (StorageNodeError e)
             {
-                throw new SerializationError.STORAGE_ERROR(e.message);
+                throw new StorableError.STORAGE_ERROR(e.message);
             }
         }
 
-        public override void dump() throws SerializationError
+        public override void dump() throws StorableError
         {
             backend.dump();
             wrapper.dump();
@@ -58,8 +58,6 @@ namespace Utaha.Core
 
         public void start() throws BackendError
         {
-            // if (backend.status(taskdata.id).active)
-            //     throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is already started");
             backend.submit(taskdata.id);
         }
 
@@ -67,17 +65,17 @@ namespace Utaha.Core
         {
             if (!backend.status(taskdata.id).active)
                 throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is not active");
-            wrapper.query_stop();
+            wrapper.query_stop.begin((obj, res) => { wrapper.query_stop.end(res); });
         }
 
-        public void destroy() throws SerializationError, TaskError
+        public void destroy() throws BackendError, StorableError, TaskError
         {
             if (backend.status(taskdata.id).active)
                 throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is active");
             remove();
         }
 
-        public override void remove() throws SerializationError
+        public override void remove() throws StorableError
         {
             backend.remove();
             wrapper.remove();

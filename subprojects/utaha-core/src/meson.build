@@ -10,8 +10,8 @@ sources = files(
   'module.vala',
   'moduleerror.vala',
   'moduleloader.vala',
-  'serializable.vala',
-  'serializationerror.vala',
+  'storable.vala',
+  'storableerror.vala',
   'status.vala',
   'storage.vala',
   'storagenode.vala',
@@ -21,5 +21,6 @@ sources = files(
   'taskerror.vala',
   'taskstatus.vala',
   'wrapper.vala',
+  'wrappererror.vala',
   'wrapperstatus.vala',
 )

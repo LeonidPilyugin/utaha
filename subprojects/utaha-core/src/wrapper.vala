@@ -1,6 +1,6 @@
 namespace Utaha.Core
 {
-    public abstract class Wrapper : Serializable, IJsonable
+    public abstract class Wrapper : Storable, IJsonable
     {
 
         [CCode (has_target = false)]
@@ -8,11 +8,11 @@ namespace Utaha.Core
 
         public abstract WrapperStatus status();
 
-        public abstract async void start();
+        public abstract async void start() throws WrapperError;
 
         public abstract void stop();
 
-        public virtual bool on_tick()
+        public virtual bool on_tick() throws WrapperError
         {
             if (node.file_exists("stop"))
             {

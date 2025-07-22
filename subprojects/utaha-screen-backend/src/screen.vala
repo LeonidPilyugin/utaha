@@ -96,7 +96,7 @@ namespace Utaha.ScreenBackend
             string sout, serr;
             int status;
 
-            string cmd = "screen -L -dmS " + Shell.quote(id);
+            string cmd = "screen -dmS " + Shell.quote(id);
             foreach (unowned string str in command)
                 cmd += " " + Shell.quote(str);
 

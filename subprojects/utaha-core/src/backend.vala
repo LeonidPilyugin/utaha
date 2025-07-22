@@ -1,6 +1,6 @@
 namespace Utaha.Core
 {
-    public abstract class Backend : Serializable, IJsonable
+    public abstract class Backend : Storable, IJsonable
     {
         public abstract BackendHealthReport healthcheck();
 

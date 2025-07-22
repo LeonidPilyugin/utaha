@@ -20,8 +20,8 @@ namespace Utaha.Core
                 );
 
             if (!type.is_a(typeof(IJsonable)))
-                throw new SerializationError.TYPE_ERROR(
-                    @"The type $(type.name()) is not instance of Serializable"
+                throw new JsonableError.TYPE_ERROR(
+                    @"The type $(type.name()) is not instance of Storable"
                 );
             if (!ttype.is_a(type))
                 throw new JsonableError.TYPE_ERROR(

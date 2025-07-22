@@ -5,12 +5,12 @@ namespace Utaha.Core
         private StorageNode node;
         private static Storage? storage = null;
 
-        private Storage(string path)
+        private Storage(string path) throws StorageNodeError
         {
             node = new StorageNode(path);
         }
 
-        public static Storage get_storage()
+        public static Storage get_storage() throws StorageNodeError
         {
             if (storage == null)
             {
@@ -23,25 +23,27 @@ namespace Utaha.Core
             return storage;
         }
 
-        public List<Task> list_tasks()
+        public List<Task> list_tasks() throws StorageNodeError, StorableError
         {
             Dir dir;
             var result = new List<Task>();
             try
             {
                 dir = Dir.open(node.path);
+
+                string? name = null;
+                while ((name = dir.read_name()) != null)
+                {
+                    name = Path.get_basename(name);
+                    result.append(get_task(Id.from_string(name)));
+                }
             } catch (FileError e)
             {
-                throw new ModuleError.ERROR(e.message);
-            }
-
-            string? name = null;
-            while ((name = dir.read_name()) != null)
+                throw new StorageNodeError.ERROR(e.message);
+            } catch (IdError e)
             {
-                name = Path.get_basename(name);
-                result.append(get_task(Id.from_string(name)));
+                throw new StorageNodeError.ERROR(e.message);
             }
-
             return result;
         }
 
@@ -64,14 +66,14 @@ namespace Utaha.Core
             return node.subnode(id.uuid);
         }
 
-        public Task get_task(Id id) throws StorageNodeError
+        public Task get_task(Id id) throws StorageNodeError, StorableError
         {
-            return Serializable.load_from<Task>(get_node(id));
+            return Storable.load_from<Task>(get_node(id));
         }
 
         public delegate void TaskFunction (Task task);
 
-        public void @foreach(TaskFunction func)
+        public void @foreach(TaskFunction func) throws StorageNodeError, IdError, StorableError
         {
             foreach (unowned string name in node.list_children())
                 func(get_task(Id.from_string(name)));

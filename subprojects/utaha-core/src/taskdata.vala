@@ -1,6 +1,6 @@
 namespace Utaha.Core
 {
-    public sealed class TaskData : Serializable, IJsonable
+    public sealed class TaskData : Storable, IJsonable
     {
         public Id id { get; private set; }
         public string alias { get; private set; }
@@ -13,7 +13,7 @@ namespace Utaha.Core
             this.comment = comment;
         }
 
-        public override void init() throws SerializationError
+        public override void init() throws StorableError
         {
             base.init();
             try
@@ -21,13 +21,13 @@ namespace Utaha.Core
                 node.touch_file("taskdata.json");
             } catch (StorageNodeError e)
             {
-                throw new SerializationError.STORAGE_ERROR(
+                throw new StorableError.STORAGE_ERROR(
                     @"Could not initialize storage node: $(e.message)"
                 );
             }
         }
 
-        public override void load() throws SerializationError
+        public override void load() throws StorableError
         {
             try
             {
@@ -36,18 +36,18 @@ namespace Utaha.Core
                 var object = parser.get_root().get_object();
                 init_json(object);
                 if (!object.has_member("id"))
-                    throw new SerializationError.ERROR("Corrupted taskdata.json");
+                    throw new StorableError.ERROR("Corrupted taskdata.json");
                 id = Id.from_string(object.get_string_member("id"));
             } catch (StorageNodeError e)
             {
-                throw new SerializationError.STORAGE_ERROR(e.message);
+                throw new StorableError.STORAGE_ERROR(e.message);
             } catch (Error e)
             {
-                throw new SerializationError.ERROR(e.message);
+                throw new StorableError.ERROR(e.message);
             }
         }
 
-        public override void dump() throws SerializationError
+        public override void dump() throws StorableError
         {
             try
             {
@@ -72,13 +72,13 @@ namespace Utaha.Core
                 node.write_file("taskdata.json", generator.to_data(null));
             } catch (StorageNodeError e)
             {
-                throw new SerializationError.STORAGE_ERROR(
+                throw new StorableError.STORAGE_ERROR(
                     @"Could not dump: $(e.message)"
                 );
             }
         }
 
-        protected override void init_json(Json.Object object) throws JsonableError
+        protected void init_json(Json.Object object) throws JsonableError
         {
             id = Id.generate();
 

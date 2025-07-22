@@ -41,7 +41,7 @@ namespace Utaha.DefaultWrapper
             last_active = null;
         }
 
-        public override void init() throws Utaha.Core.SerializationError
+        public override void init() throws Utaha.Core.StorableError
         {
             base.init();
             try
@@ -51,13 +51,13 @@ namespace Utaha.DefaultWrapper
                 node.touch_file("stderr");
             } catch (Utaha.Core.StorageNodeError e)
             {
-                throw new Utaha.Core.SerializationError.STORAGE_ERROR(
+                throw new Utaha.Core.StorableError.STORAGE_ERROR(
                     @"Could not initialize storage node: $(e.message)"
                 );
             }
         }
 
-        public override void load() throws Utaha.Core.SerializationError
+        public override void load() throws Utaha.Core.StorableError
         {
             try
             {
@@ -70,17 +70,17 @@ namespace Utaha.DefaultWrapper
                 launcher.set_stderr_file_path(node.build("stderr"));
             } catch (Utaha.Core.StorageNodeError e)
             {
-                throw new Utaha.Core.SerializationError.STORAGE_ERROR(e.message);
+                throw new Utaha.Core.StorableError.STORAGE_ERROR(e.message);
             } catch (Utaha.Core.JsonableError e)
             {
-                throw new Utaha.Core.SerializationError.ERROR(e.message);
+                throw new Utaha.Core.StorableError.ERROR(e.message);
             } catch (Error e)
             {
-                throw new Utaha.Core.SerializationError.ERROR(e.message);
+                throw new Utaha.Core.StorableError.ERROR(e.message);
             }
         }
 
-        public override void dump() throws Utaha.Core.SerializationError
+        public override void dump() throws Utaha.Core.StorableError
         {
             try
             {
@@ -102,7 +102,7 @@ namespace Utaha.DefaultWrapper
                 node.write_file("wrapper.json", generator.to_data(null));
             } catch (Utaha.Core.StorageNodeError e)
             {
-                throw new Utaha.Core.SerializationError.STORAGE_ERROR(
+                throw new Utaha.Core.StorableError.STORAGE_ERROR(
                     @"Could not dump: $(e.message)"
                 );
             }
@@ -115,11 +115,17 @@ namespace Utaha.DefaultWrapper
             );
         }
 
-        public override async void start()
+        public override async void start() throws Utaha.Core.WrapperError
         {
-            process = launcher.spawnv(command);
-            yield process.wait_async();
-            exited = true;
+            try
+            {
+                process = launcher.spawnv(command);
+                yield process.wait_async();
+                exited = true;
+            } catch (Error e)
+            {
+                throw new Utaha.Core.WrapperError.ERROR(e.message);
+            }
         }
 
         public override void stop()
@@ -128,12 +134,18 @@ namespace Utaha.DefaultWrapper
             exited = true;
         }
 
-        public override bool on_tick()
+        public override bool on_tick() throws Utaha.Core.WrapperError
         {
-            base.on_tick();
-            last_active = new DateTime.now();
-            dump();
-            return exited;
+            try
+            {
+                base.on_tick();
+                last_active = new DateTime.now();
+                dump();
+                return exited;
+            } catch (Utaha.Core.StorableError e)
+            {
+                throw new Utaha.Core.WrapperError.ERROR(e.message);
+            }
         }
 
         private static void on_term(Utaha.Core.Wrapper wrapper, ProcessSignal signal)
