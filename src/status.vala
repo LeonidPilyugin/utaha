@@ -1,8 +1,8 @@
 namespace Utaha.App
 {
-    static void status(Utaha.Core.Id id)
+    static void status(Utaha.Core.Id id) throws Error
     {
-        Utaha.Core.Task task = Utaha.Core.Storage.get_storage().get_task(id);
+        var task = Utaha.Core.Storage.get_storage().get_task(id);
         var ht = task.status().as_hash_table();
 
         foreach (unowned string key in ht.get_keys())

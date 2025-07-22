@@ -23,6 +23,7 @@ namespace Utaha.DefaultWrapper
         private DateTime? last_active = null;
         private SubprocessLauncher launcher = null;
         private Subprocess process = null;
+        private bool exited = false;
 
         protected override void init_json(Json.Object object) throws Utaha.Core.JsonableError
         {
@@ -114,22 +115,25 @@ namespace Utaha.DefaultWrapper
             );
         }
 
-        public override void start()
+        public override async void start()
         {
             process = launcher.spawnv(command);
+            yield process.wait_async();
+            exited = true;
         }
 
         public override void stop()
         {
             process.force_exit();
+            exited = true;
         }
 
         public override bool on_tick()
         {
+            base.on_tick();
             last_active = new DateTime.now();
             dump();
-
-            return process.get_if_exited() || process.get_if_signaled();
+            return exited;
         }
 
         private static void on_term(Utaha.Core.Wrapper wrapper, ProcessSignal signal)
@@ -139,10 +143,11 @@ namespace Utaha.DefaultWrapper
             w.dump();
         }
 
-        public override HashTable<ProcessSignal, SignalHandlerMethod> get_signal_handlers()
+        public override HashTable<ProcessSignal?, SignalHandlerMethod> get_signal_handlers()
         {
-            var result = new HashTable<ProcessSignal, SignalHandlerMethod>(int_hash, int_equal);
+            var result = new HashTable<ProcessSignal?, SignalHandlerMethod>(int_hash, int_equal);
             result.insert(ProcessSignal.TERM, on_term);
+            result.insert(ProcessSignal.HUP, on_term);
             return result;
         }
     }

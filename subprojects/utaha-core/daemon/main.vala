@@ -5,12 +5,12 @@ errordomain HandlerError
 
 static MainLoop loop = null;
 static Utaha.Core.Task task = null;
-static HashTable<ProcessSignal, Utaha.Core.Wrapper.SignalHandlerMethod> handlers;
+static HashTable<ProcessSignal?, Utaha.Core.Wrapper.SignalHandlerMethod> handlers;
 
 static void register_signals()
 {
-    var signals = task.wrapper.get_signal_handlers();
-    foreach (ProcessSignal sig in signals.get_keys())
+    handlers = task.wrapper.get_signal_handlers();
+    foreach (ProcessSignal? sig in handlers.get_keys())
         Process.signal(sig, on_signal);
 }
 
@@ -30,14 +30,15 @@ static void on_signal(int signal)
 
 }
 
-static void run(Utaha.Core.Id id, int delay = 1000)
+static void run(Utaha.Core.Id id, int delay = 100)
 {
     task = Utaha.Core.Storage.get_storage().get_task(id);
+    register_signals();
     loop = new MainLoop();
-    TimeoutSource time = new TimeoutSource(delay);
+    var time = new TimeoutSource(delay);
     time.set_callback(timer_callback);
     time.attach(loop.get_context());
-    task.wrapper.start();
+    task.wrapper.start.begin();
     loop.run();
 }
 

@@ -18,6 +18,7 @@ sources = files(
   'storagenodeerror.vala',
   'task.vala',
   'taskdata.vala',
+  'taskerror.vala',
   'taskstatus.vala',
   'wrapper.vala',
   'wrapperstatus.vala',

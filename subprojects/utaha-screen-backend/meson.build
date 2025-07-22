@@ -14,6 +14,7 @@ dependencies = [
   dependency('gobject-2.0'),
   dependency('json-glib-1.0'),
   dependency('utaha-core'),
+  meson.get_compiler('vala').find_library('posix'),
 ]
 
 subdir('src')

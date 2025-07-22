@@ -45,12 +45,26 @@ namespace Utaha.Core
             return result;
         }
 
-        public StorageNode get_node(Id id)
+        public bool has_node(Id id)
         {
+            return node.file_exists(id.uuid);
+        }
+
+        public StorageNode create_node(Id id) throws StorageNodeError
+        {
+            if (has_node(id))
+                throw new StorageNodeError.ERROR(@"Node $(id.uuid) exists");
             return node.subnode(id.uuid);
         }
 
-        public Task get_task(Id id)
+        public StorageNode get_node(Id id) throws StorageNodeError
+        {
+            if (!has_node(id))
+                throw new StorageNodeError.ERROR(@"Node $(id.uuid) does not exist");
+            return node.subnode(id.uuid);
+        }
+
+        public Task get_task(Id id) throws StorageNodeError
         {
             return Serializable.load_from<Task>(get_node(id));
         }

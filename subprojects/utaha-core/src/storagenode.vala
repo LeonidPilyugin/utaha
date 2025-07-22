@@ -17,6 +17,17 @@ namespace Utaha.Core
             return file.query_exists();
         }
 
+        public void remove_file(string name) throws StorageNodeError
+        {
+            try
+            {
+                File.new_for_path(build(name)).delete();
+            } catch (Error e)
+            {
+                throw new StorageNodeError.FS_ERROR(e.message);
+            }
+        }
+
         public string build(string name)
         {
             return Path.build_filename(path, name);

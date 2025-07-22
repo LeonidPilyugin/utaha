@@ -1,6 +1,6 @@
 namespace Utaha.App
 {
-    static void list()
+    static void list() throws Error
     {
         var tasks = Utaha.Core.Storage.get_storage().list_tasks();
         foreach (Utaha.Core.Task task in tasks)

@@ -11,14 +11,14 @@ namespace Utaha.App
             if (parser.remove) remove(parser.id);
             if (parser.start) start(parser.id);
             if (parser.status) status(parser.id);
+            if (parser.stop) stop(parser.id);
             if (parser.list) list();
 
         } catch (Error e)
         {
-            error(e.message);
+            critical(e.message);
             return 1;
         }
-
         return 0;
     }
 }

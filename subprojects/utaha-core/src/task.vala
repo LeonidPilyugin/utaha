@@ -56,19 +56,25 @@ namespace Utaha.Core
             base.dump();
         }
 
-        public void submit() throws BackendError
-        {
-            backend.submit(taskdata.id);
-        }
-
         public void start() throws BackendError
         {
+            // if (backend.status(taskdata.id).active)
+            //     throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is already started");
             backend.submit(taskdata.id);
         }
 
-        public void stop() throws BackendError
+        public void stop() throws BackendError, TaskError
         {
-            backend.cancel(taskdata.id);
+            if (!backend.status(taskdata.id).active)
+                throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is not active");
+            wrapper.query_stop();
+        }
+
+        public void destroy() throws SerializationError, TaskError
+        {
+            if (backend.status(taskdata.id).active)
+                throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is active");
+            remove();
         }
 
         public override void remove() throws SerializationError
