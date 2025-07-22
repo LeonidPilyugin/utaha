@@ -24,6 +24,7 @@ namespace Utaha.App
         public bool load { get; private set; }
         public bool start { get; private set; }
         public bool list { get; private set; }
+        public bool remove { get; private set; }
         public bool status { get; private set; }
         public Utaha.Core.Id? id { get; private set; }
         public string? file { get; private set; }
@@ -34,8 +35,9 @@ namespace Utaha.App
             start = args[1] == "start";
             list = args[1] == "list";
             status = args[1] == "status";
+            remove = args[1] == "remove";
 
-            if (start | status) id = Utaha.Core.Id.from_string(args[2]);
+            if (start || status || remove) id = Utaha.Core.Id.from_string(args[2]);
             else id = null;
             file = load ? args[2] : null;
         }

@@ -8,6 +8,7 @@ namespace Utaha.App
             Parser parser = new Parser(args);
 
             if (parser.load) load(parser.file);
+            if (parser.remove) remove(parser.id);
             if (parser.start) start(parser.id);
             if (parser.status) status(parser.id);
             if (parser.list) list();

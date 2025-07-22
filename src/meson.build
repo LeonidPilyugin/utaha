@@ -3,6 +3,7 @@ sources = files(
   'load.vala',
   'main.vala',
   'parser.vala',
+  'remove.vala',
   'start.vala',
   'status.vala',
 )

@@ -29,25 +29,37 @@ namespace Utaha.Core
                 file.make_directory_with_parents();
             } catch (Error e)
             {
-                throw new StorageNodeError.FS_ERROR(
-                    @"Cannot create directory \"$path\": $(e.message)"
-                );
+                throw new StorageNodeError.FS_ERROR(e.message);
             }
+        }
+
+        private void remove_recursively(File file)
+        {
+            var enumerator = file.enumerate_children("*", FileQueryInfoFlags.NONE);
+            FileInfo? info = null;
+
+            while (null != (info = enumerator.next_file()))
+            {
+                if (info.get_file_type() == FileType.REGULAR) {
+                    file.get_child(info.get_name()).delete();
+                } else if (info.get_file_type() == FileType.DIRECTORY) {
+                    var subfolder = file.get_child(info.get_name());
+                    remove_recursively(subfolder);
+                    subfolder.delete();
+                }
+            }
+
+            file.delete();
         }
 
         public void remove() throws StorageNodeError
         {
             try
             {
-                // if (!file.delete())
-                //     throw new StorageNodeError.FS_ERROR(
-                //         @"Could not remove directory \"$path\"."
-                //     );
+                remove_recursively(file);
             } catch (Error e)
             {
-                throw new StorageNodeError.FS_ERROR(
-                    @"Could not remove directory \"$path\": $(e.message)"
-                );
+                throw new StorageNodeError.FS_ERROR(e.message);
             }
         }
 
@@ -69,9 +81,7 @@ namespace Utaha.Core
                     File.new_for_path(build(name)).create(FileCreateFlags.NONE);
             } catch (Error e)
             {
-                throw new StorageNodeError.FS_ERROR(
-                    @"Could not create file \"$(build(name))\": $(e.message)"
-                );
+                throw new StorageNodeError.FS_ERROR(e.message);
             }
         }
 
