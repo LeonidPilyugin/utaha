@@ -54,5 +54,13 @@ namespace Utaha.Core
         {
             return Serializable.load_from<Task>(get_node(id));
         }
+
+        public delegate void TaskFunction (Task task);
+
+        public void @foreach(TaskFunction func)
+        {
+            foreach (unowned string name in node.list_children())
+                func(get_task(Id.from_string(name)));
+        }
     }
 }

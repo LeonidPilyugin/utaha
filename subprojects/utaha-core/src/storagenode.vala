@@ -33,6 +33,16 @@ namespace Utaha.Core
             }
         }
 
+        public List<string> list_children()
+        {
+            var result = new List<string>();
+            var enumerator = file.enumerate_children("*", FileQueryInfoFlags.NONE);
+            FileInfo? info = null;
+            while (null != (info = enumerator.next_file()))
+                result.append(info.get_name());
+            return result;
+        }
+
         private void remove_recursively(File file)
         {
             var enumerator = file.enumerate_children("*", FileQueryInfoFlags.NONE);
