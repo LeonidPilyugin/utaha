@@ -95,18 +95,15 @@ namespace Utaha.Core
             }
         }
 
-        public delegate void TaskFunction (Task task);
-
-        public void @foreach(TaskFunction func) throws StorageError, StorableError
+        public TaskIterator iterator() throws StorageError
         {
             try
             {
-                foreach (unowned string name in node.list_children())
-                    func(get_task(Id.from_string(name)));
-            } catch (IdError e)
+                return new TaskIterator(node.list_children());
+            } catch (StorageNodeError e)
             {
                 throw new StorageError.ERROR(e.message);
-            } catch (StorageNodeError e)
+            } catch (IdError e)
             {
                 throw new StorageError.ERROR(e.message);
             }

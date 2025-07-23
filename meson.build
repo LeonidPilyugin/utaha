@@ -9,10 +9,6 @@ project(
   ]
 )
 
-# add_global_arguments(
-#   [ '--vapidir', meson.current_source_dir() / 'vapi' ],
-#   language: [ 'vala' ],
-# )
 add_global_arguments(
   [ '-w' ],
   language: [ 'c' ],
@@ -20,6 +16,7 @@ add_global_arguments(
 
 subprojects = [
   [ 'utaha-core', { } ],
+  [ 'utaha-app', { } ],
   [ 'utaha-default-wrapper', { } ],
   [ 'utaha-screen-backend', { } ],
 ]
@@ -43,6 +40,7 @@ dependencies = [
   dependency('glib-2.0'),
   dependency('gobject-2.0'),
   dependency('utaha-core'),
+  dependency('utaha-app'),
 ]
 
 subdir('src')

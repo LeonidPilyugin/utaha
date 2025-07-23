@@ -20,6 +20,7 @@ sources = files(
   'task.vala',
   'taskdata.vala',
   'taskerror.vala',
+  'taskiterator.vala',
   'taskstatus.vala',
   'wrapper.vala',
   'wrappererror.vala',
