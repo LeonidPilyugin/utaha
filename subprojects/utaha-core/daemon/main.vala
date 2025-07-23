@@ -41,7 +41,7 @@ static void run(Utaha.Core.Id id, int delay = 100)
     try
     {
         task = Utaha.Core.Storage.get_storage().get_task(id);
-    } catch (Utaha.Core.StorageNodeError e)
+    } catch (Utaha.Core.StorageError e)
     {
         error(e.message);
     } catch (Utaha.Core.StorableError e)

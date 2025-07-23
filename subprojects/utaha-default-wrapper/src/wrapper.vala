@@ -150,9 +150,15 @@ namespace Utaha.DefaultWrapper
 
         private static void on_term(Utaha.Core.Wrapper wrapper, ProcessSignal signal)
         {
-            var w = (Wrapper) wrapper;
-            w.stop();
-            w.dump();
+            try
+            {
+                var w = (Wrapper) wrapper;
+                w.stop();
+                w.dump();
+            } catch (Utaha.Core.StorableError e)
+            {
+                error(@"Unexpected error: $(e.message)");
+            }
         }
 
         public override HashTable<ProcessSignal?, SignalHandlerMethod> get_signal_handlers()

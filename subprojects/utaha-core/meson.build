@@ -26,12 +26,11 @@ lib = shared_library(
   sources,
   vala_header: meson.project_name().to_lower() + '.h',
   vala_vapi: meson.project_name().to_lower() + '.vapi',
-  vala_gir: meson.project_name().to_lower() + '-' + meson.project_version() + '.gir',
   version: meson.project_version(),
   dependencies: dependencies,
   install: true,
 
-  install_dir: [ true, true, true, true ],
+  install_dir: [ true, true, true ],
 )
 
 pkgconfig.generate(

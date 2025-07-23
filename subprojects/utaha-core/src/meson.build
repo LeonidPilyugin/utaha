@@ -14,6 +14,7 @@ sources = files(
   'storableerror.vala',
   'status.vala',
   'storage.vala',
+  'storageerror.vala',
   'storagenode.vala',
   'storagenodeerror.vala',
   'task.vala',

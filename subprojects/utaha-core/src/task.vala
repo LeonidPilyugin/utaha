@@ -20,10 +20,16 @@ namespace Utaha.Core
             get { return _node; }
             set
             {
-                _node = value;
-                if (taskdata != null) taskdata.node = node == null ? null : node.subnode("taskdata");
-                if (backend != null) backend.node = node == null ? null : node.subnode("backend");
-                if (wrapper != null) wrapper.node = node == null ? null : node.subnode("wrapper");
+                try
+                {
+                    _node = value;
+                    if (taskdata != null) taskdata.node = node == null ? null : node.subnode("taskdata");
+                    if (backend != null) backend.node = node == null ? null : node.subnode("backend");
+                    if (wrapper != null) wrapper.node = node == null ? null : node.subnode("wrapper");
+                } catch (StorageNodeError e)
+                {
+                    error(@"Unexpected error: $(e.message)");
+                }
             }
         }
 

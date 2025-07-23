@@ -14,22 +14,34 @@ namespace Utaha.Core
 
         public virtual bool on_tick() throws WrapperError
         {
-            if (node.file_exists("stop"))
+            try
             {
-                stop();
-                node.write_file("stop", "ack");
-                return true;
-            }
+                if (node.file_exists("stop"))
+                {
+                    stop();
+                    node.write_file("stop", "ack");
+                    return true;
+                }
 
-            return false;
+                return false;
+            } catch (StorageNodeError e)
+            {
+                error(@"Unexpected error: $(e.message)");
+            }
         }
 
         public async void query_stop()
         {
-            node.touch_file("stop");
-            yield;
-            while (node.read_file("stop") != "ack") Thread.usleep(100000);
-            node.remove_file("stop");
+            try
+            {
+                node.touch_file("stop");
+                yield;
+                while (node.read_file("stop") != "ack") Thread.usleep(100000);
+                node.remove_file("stop");
+            } catch (StorageNodeError e)
+            {
+                error(@"Unexpected error: $(e.message)");
+            }
         }
 
         public abstract HashTable<ProcessSignal?, SignalHandlerMethod> get_signal_handlers();

@@ -9,7 +9,7 @@ namespace Utaha.App
         } catch (Utaha.Core.BackendError e)
         {
             throw new Error.RUNTIME_ERROR(e.message);
-        } catch (Utaha.Core.StorageNodeError e)
+        } catch (Utaha.Core.StorageError e)
         {
             throw new Error.RUNTIME_ERROR(e.message);
         } catch (Utaha.Core.StorableError e)

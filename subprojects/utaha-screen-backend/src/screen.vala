@@ -10,7 +10,13 @@ namespace Utaha.ScreenBackend
     [Immutable]
     public class Session : Object
     {
-        public int? pid { get; private set; }
+        private int? pid;
+
+        public int? get_pid()
+        {
+            return pid;
+        }
+
         public string? id { get; private set; }
 
         public Session(int? pid, string? id)
@@ -26,7 +32,13 @@ namespace Utaha.ScreenBackend
 
         public Screen()
         {
-            session_regex = new Regex("""^\s*(\d+)\.(.+)\s\(\w+\)$""");
+            try
+            {
+                session_regex = new Regex("""^\s*(\d+)\.(.+)\s\(\w+\)$""");
+            } catch (RegexError e)
+            {
+                error(@"Unexpected error $(e.message)");
+            }
         }
 
         private Session get_session(MatchInfo match) throws ScreenError

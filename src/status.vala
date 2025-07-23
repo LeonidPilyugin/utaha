@@ -9,7 +9,7 @@ namespace Utaha.App
 
             foreach (unowned string key in ht.get_keys())
                 stdout.printf(@"$key: $(ht.get(key))\n");
-        } catch (Utaha.Core.StorageNodeError e)
+        } catch (Utaha.Core.StorageError e)
         {
             throw new Error.RUNTIME_ERROR(e.message);
         } catch (Utaha.Core.StorableError e)

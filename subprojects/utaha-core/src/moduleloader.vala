@@ -32,25 +32,6 @@ namespace Utaha.Core
                 throw new ModuleError.ERROR(module.error);
         }
 
-        public static void load_dir(string path) throws ModuleError
-        {
-            Dir dir;
-            try
-            {
-                dir = Dir.open(path);
-            } catch (FileError e)
-            {
-                throw new ModuleError.ERROR(e.message);
-            }
-
-            string? name = null;
-            while ((name = dir.read_name()) != null)
-            {
-                name = Path.get_basename(name);
-                load_module(Path.build_filename(path, name));
-            }
-        }
-
         public static void try_load_dir(string path)
         {
             Dir dir;

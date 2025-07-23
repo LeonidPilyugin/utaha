@@ -27,7 +27,12 @@ namespace Utaha.ScreenBackend
     [Immutable]
     public sealed class BackendStatus : Utaha.Core.BackendStatus
     {
-        public int? pid { get; private set; }
+        private int? pid;
+
+        public int? get_pid()
+        {
+            return pid;
+        }
 
         public BackendStatus(bool active, int? pid)
         {
@@ -88,7 +93,7 @@ namespace Utaha.ScreenBackend
                 throw new Utaha.Core.BackendError.ERROR(@"Falied to find session: $(e.message)");
             }
 
-            return new BackendStatus(session.pid != null, session.pid);
+            return new BackendStatus(session.get_pid() != null, session.get_pid());
         }
 
         protected override void init_json(Json.Object object) throws Utaha.Core.JsonableError { }

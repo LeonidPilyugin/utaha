@@ -5,12 +5,18 @@ namespace Utaha.Core
         private StorageNode node;
         private static Storage? storage = null;
 
-        private Storage(string path) throws StorageNodeError
+        private Storage(string path) throws StorageError
         {
-            node = new StorageNode(path);
+            try
+            {
+                node = new StorageNode(path);
+            } catch (StorageNodeError e)
+            {
+                throw new StorageError.ERROR(e.message);
+            }
         }
 
-        public static Storage get_storage() throws StorageNodeError
+        public static Storage get_storage() throws StorageError
         {
             if (storage == null)
             {
@@ -23,7 +29,7 @@ namespace Utaha.Core
             return storage;
         }
 
-        public List<Task> list_tasks() throws StorageNodeError, StorableError
+        public List<Task> list_tasks() throws StorageError, StorableError
         {
             Dir dir;
             var result = new List<Task>();
@@ -39,10 +45,10 @@ namespace Utaha.Core
                 }
             } catch (FileError e)
             {
-                throw new StorageNodeError.ERROR(e.message);
+                throw new StorageError.ERROR(e.message);
             } catch (IdError e)
             {
-                throw new StorageNodeError.ERROR(e.message);
+                throw new StorageError.ERROR(e.message);
             }
             return result;
         }
@@ -52,31 +58,58 @@ namespace Utaha.Core
             return node.file_exists(id.uuid);
         }
 
-        public StorageNode create_node(Id id) throws StorageNodeError
+        public StorageNode create_node(Id id) throws StorageError
         {
             if (has_node(id))
-                throw new StorageNodeError.ERROR(@"Node $(id.uuid) exists");
-            return node.subnode(id.uuid);
+                throw new StorageError.ERROR(@"Node $(id.uuid) exists");
+            try
+            {
+                return node.subnode(id.uuid);
+            } catch (StorageNodeError e)
+            {
+                throw new StorageError.ERROR(e.message);
+            }
         }
 
-        public StorageNode get_node(Id id) throws StorageNodeError
+        public StorageNode get_node(Id id) throws StorageError
         {
             if (!has_node(id))
-                throw new StorageNodeError.ERROR(@"Node $(id.uuid) does not exist");
-            return node.subnode(id.uuid);
+                throw new StorageError.ERROR(@"Node $(id.uuid) does not exist");
+            try
+            {
+                return node.subnode(id.uuid);
+            } catch (StorageNodeError e)
+            {
+                throw new StorageError.ERROR(e.message);
+            }
         }
 
-        public Task get_task(Id id) throws StorageNodeError, StorableError
+        public Task get_task(Id id) throws StorageError, StorableError
         {
-            return Storable.load_from<Task>(get_node(id));
+            try
+            {
+                return Storable.load_from<Task>(get_node(id));
+            } catch (StorageNodeError e)
+            {
+                throw new StorageError.ERROR(e.message);
+            }
         }
 
         public delegate void TaskFunction (Task task);
 
-        public void @foreach(TaskFunction func) throws StorageNodeError, IdError, StorableError
+        public void @foreach(TaskFunction func) throws StorageError, StorableError
         {
-            foreach (unowned string name in node.list_children())
-                func(get_task(Id.from_string(name)));
+            try
+            {
+                foreach (unowned string name in node.list_children())
+                    func(get_task(Id.from_string(name)));
+            } catch (IdError e)
+            {
+                throw new StorageError.ERROR(e.message);
+            } catch (StorageNodeError e)
+            {
+                throw new StorageError.ERROR(e.message);
+            }
         }
     }
 }
