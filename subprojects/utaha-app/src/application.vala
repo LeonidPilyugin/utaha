@@ -45,33 +45,7 @@ namespace Utaha.App
                 return;
             }
 
-            if (options.active)
-            {
-                selectors.append_val(new Selector((task) => {
-                    try
-                    {
-                        return task.status().backend_status.active;
-                    } catch (Utaha.Core.BackendError e)
-                    {
-                        printerr(@"$(e.message)\n");
-                    }
-                    return false;
-                }));
-            }
-
-            if (options.inactive)
-            {
-                selectors.append_val(new Selector((task) => {
-                    try
-                    {
-                        return !task.status().backend_status.active;
-                    } catch (Utaha.Core.BackendError e)
-                    {
-                        printerr(@"$(e.message)\n");
-                    }
-                    return false;
-                }));
-            }
+            set_selectors();
 
             if (options.start)
             {
@@ -143,6 +117,37 @@ namespace Utaha.App
                 @foreach((task) => {
                     stdout.printf(@"$(task.taskdata.id.uuid)\n");
                 });
+            }
+        }
+
+        public void set_selectors()
+        {
+            if (options.active)
+            {
+                selectors.append_val(new Selector((task) => {
+                    try
+                    {
+                        return task.status().backend_status.active;
+                    } catch (Utaha.Core.BackendError e)
+                    {
+                        printerr(@"$(e.message)\n");
+                    }
+                    return false;
+                }));
+            }
+
+            if (options.inactive)
+            {
+                selectors.append_val(new Selector((task) => {
+                    try
+                    {
+                        return !task.status().backend_status.active;
+                    } catch (Utaha.Core.BackendError e)
+                    {
+                        printerr(@"$(e.message)\n");
+                    }
+                    return false;
+                }));
             }
         }
 

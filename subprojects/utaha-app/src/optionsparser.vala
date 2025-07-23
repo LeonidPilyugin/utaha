@@ -45,7 +45,7 @@ namespace Utaha.App
 
         private const OptionEntry[] load_options =
         {
-            { "load", '\0', OptionFlags.NONE, OptionArg.FILENAME_ARRAY, ref descriptors, "List of task descriptors", "DESCRIPTORS..." },
+            { "load", '\0', OptionFlags.NONE, OptionArg.FILENAME_ARRAY, ref descriptors, "Task descriptor file", "FILE" },
             { null }
         };
 
@@ -78,10 +78,16 @@ namespace Utaha.App
 
         private static OptionContext context;
 
+        private const string description_string = """TODO: put description here""";
+        private const string summary_string = """Utility for Task Handling""";
+
         public static void init()
         {
-            context = new OptionContext("- utility for task handling");
+            context = new OptionContext();
             context.set_help_enabled(true);
+
+            // context.set_description(description_string);
+            context.set_summary(summary_string);
 
 			context.add_main_entries(main_options, null);
 
