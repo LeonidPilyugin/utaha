@@ -50,7 +50,7 @@ namespace Utaha.ScreenBackend
 
     public sealed class Backend : Utaha.Core.Backend
     {
-        private Screen screen = new Screen();
+        private Screen screen = Screen.get_instance();
 
         public override void load() { }
         public override void dump() { }

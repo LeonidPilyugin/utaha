@@ -28,35 +28,34 @@ namespace Utaha.ScreenBackend
 
     public class Screen : Object
     {
-        private Regex session_regex;
+        private static Screen instance = null;
 
-        public Screen()
+        private Regex session_regex;
+        private List<Session> sessions;
+
+        private Screen()
         {
             try
             {
                 session_regex = new Regex("""^\s*(\d+)\.(.+)\s\(\w+\)$""");
             } catch (RegexError e)
             {
-                error(@"Unexpected error $(e.message)");
+                assert_not_reached();
             }
+
+            reload();
         }
 
-        private Session get_session(MatchInfo match) throws ScreenError
+        public static Screen get_instance()
         {
-            string? first = match.fetch(1);
-            string? second = match.fetch(2);
-            if (first == null || second == null)
-                throw new ScreenError.PARSE_ERROR(@"Cannot parse \"$(match.fetch(0))\"");
-
-            return new Session(
-                int.parse(first),
-                second
-            );
+            if (instance == null)
+                instance = new Screen();
+            return instance;
         }
 
-        public List<Session> list_sessions() throws ScreenError
+        public void reload() throws ScreenError
         {
-            var result = new List<Session>();
+            sessions = new List<Session>();
 
             string sout, serr;
             int status;
@@ -74,32 +73,26 @@ namespace Utaha.ScreenBackend
             MatchInfo match_info;
             foreach (unowned string str in sout.split("\n"))
                 if (session_regex.match(str, 0, out match_info))
-                    result.append(get_session(match_info));
-
-            return result;
+                    sessions.append(get_session(match_info));
         }
 
-        public Session? find_session(string id) throws ScreenError
+        private Session get_session(MatchInfo match) throws ScreenError
         {
-            string sout, serr;
-            int status;
+            string? first = match.fetch(1);
+            string? second = match.fetch(2);
+            if (first == null || second == null)
+                throw new ScreenError.PARSE_ERROR(@"Cannot parse \"$(match.fetch(0))\"");
 
-            try
-            {
-                Process.spawn_command_line_sync(
-                    "screen -list", out sout, out serr, out status
-                );
-            } catch (SpawnError e)
-            {
-                throw new ScreenError.SPAWN_ERROR("Cannot spawn screen process");
-            }
+            return new Session(
+                int.parse(first),
+                second
+            );
+        }
 
-            MatchInfo match_info;
-            foreach (unowned string str in sout.split("\n"))
-                if (id in str)
-                    if (session_regex.match(str, 0, out match_info))
-                        return get_session(match_info);
-
+        public Session? find_session(string id)
+        {
+            foreach (unowned Session session in sessions)
+                if (session.id == id) return session;
             return new Session(null, null);
         }
 
