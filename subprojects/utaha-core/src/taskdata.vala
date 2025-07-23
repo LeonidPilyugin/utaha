@@ -5,6 +5,7 @@ namespace Utaha.Core
         public Id id { get; private set; }
         public string alias { get; private set; }
         public string comment { get; private set; }
+        public DateTime birth_date { get; private set; }
 
         public TaskData(Id id, string alias, string comment)
         {
@@ -37,7 +38,10 @@ namespace Utaha.Core
                 init_json(object);
                 if (!object.has_member("id"))
                     throw new StorableError.ERROR("Corrupted taskdata.json");
+                if (!object.has_member("birth_date"))
+                    throw new StorableError.ERROR("Corrupted taskdata.json");
                 id = Id.from_string(object.get_string_member("id"));
+                birth_date = new DateTime.from_unix_local(object.get_int_member("birth_date"));
             } catch (StorageNodeError e)
             {
                 throw new StorableError.STORAGE_ERROR(e.message);
@@ -63,6 +67,9 @@ namespace Utaha.Core
                 builder.set_member_name("comment");
                 builder.add_string_value(comment);
 
+                builder.set_member_name("birth_date");
+                builder.add_int_value(birth_date.to_unix());
+
                 builder.end_object();
 
                 Json.Generator generator = new Json.Generator();
@@ -81,6 +88,7 @@ namespace Utaha.Core
         protected void init_json(Json.Object object) throws JsonableError
         {
             id = Id.generate();
+            birth_date = new DateTime.now();
 
             if (!object.has_member("alias"))
                 throw new JsonableError.ERROR("Does not have \"alias\" member");

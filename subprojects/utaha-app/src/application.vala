@@ -3,7 +3,6 @@ namespace Utaha.App
     public class Application : Object
     {
         private Options options;
-        private OptionsParser parser;
         private Array<Selector> selectors;
 
         public Application()
@@ -49,14 +48,28 @@ namespace Utaha.App
             if (options.active)
             {
                 selectors.append_val(new Selector((task) => {
-                    return task.status().backend_status.active;
+                    try
+                    {
+                        return task.status().backend_status.active;
+                    } catch (Utaha.Core.BackendError e)
+                    {
+                        printerr(@"$(e.message)\n");
+                    }
+                    return false;
                 }));
             }
 
             if (options.inactive)
             {
                 selectors.append_val(new Selector((task) => {
-                    return !task.status().backend_status.active;
+                    try
+                    {
+                        return !task.status().backend_status.active;
+                    } catch (Utaha.Core.BackendError e)
+                    {
+                        printerr(@"$(e.message)\n");
+                    }
+                    return false;
                 }));
             }
 
@@ -67,12 +80,6 @@ namespace Utaha.App
                     {
                         task.start();
                     } catch (Utaha.Core.BackendError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    } catch (Utaha.Core.StorageError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    } catch (Utaha.Core.StorableError e)
                     {
                         throw new ApplicationError.ERROR(e.message);
                     }
@@ -92,12 +99,6 @@ namespace Utaha.App
                     } catch (Utaha.Core.TaskError e)
                     {
                         throw new ApplicationError.ERROR(e.message);
-                    } catch (Utaha.Core.StorageError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    } catch (Utaha.Core.StorableError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
                     }
                 });
                 return;
@@ -113,9 +114,6 @@ namespace Utaha.App
                     {
                         throw new ApplicationError.ERROR(e.message);
                     } catch (Utaha.Core.TaskError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    } catch (Utaha.Core.StorageError e)
                     {
                         throw new ApplicationError.ERROR(e.message);
                     } catch (Utaha.Core.StorableError e)
@@ -135,12 +133,6 @@ namespace Utaha.App
                     } catch (Utaha.Core.BackendError e)
                     {
                         throw new ApplicationError.ERROR(e.message);
-                    } catch (Utaha.Core.StorageError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    } catch (Utaha.Core.StorableError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
                     }
                 });
                 return;
@@ -158,21 +150,30 @@ namespace Utaha.App
 
         public void @foreach(TaskOperation operation)
         {
-            var iter = Utaha.Core.Storage.get_storage().iterator();
-            Utaha.Core.Task? task;
-
-            while (null != (task = iter.next()))
+            try
             {
-                if (Selector.all(task, selectors))
+                var iter = Utaha.Core.Storage.get_storage().iterator();
+                Utaha.Core.Task? task;
+
+                while (null != (task = iter.next()))
                 {
-                    try
+                    if (Selector.all(task, selectors))
                     {
-                        operation(task);
-                    } catch (ApplicationError e)
-                    {
-                        printerr(e.message + "\n");
+                        try
+                        {
+                            operation(task);
+                        } catch (ApplicationError e)
+                        {
+                            printerr(e.message + "\n");
+                        }
                     }
                 }
+            } catch (Utaha.Core.StorageError e)
+            {
+                printerr(e.message + "\n");
+            } catch (Utaha.Core.StorableError e)
+            {
+                printerr(e.message + "\n");
             }
         }
 
@@ -183,13 +184,19 @@ namespace Utaha.App
 
         public void load_file(string path)
         {
-            var parser = new Json.Parser();
-            parser.load_from_file(path);
-            var task = Utaha.Core.IJsonable.load_json<Utaha.Core.Task>(parser.get_root().get_object());
+            try
+            {
+                var parser = new Json.Parser();
+                parser.load_from_file(path);
+                var task = Utaha.Core.IJsonable.load_json<Utaha.Core.Task>(parser.get_root().get_object());
 
-            task.node = Utaha.Core.Storage.get_storage().create_node(task.taskdata.id);
-            task.init();
-            task.dump();
+                task.node = Utaha.Core.Storage.get_storage().create_node(task.taskdata.id);
+                task.init();
+                task.dump();
+            } catch (Error e)
+            {
+                printerr(@"$(e.message)\n");
+            }
         }
 
         public void load()

@@ -6,7 +6,7 @@ namespace Utaha.Core
         private int index;
         private Storage storage;
 
-        internal TaskIterator(List<string> ids) throws IdError
+        internal TaskIterator(List<string> ids) throws IdError, StorageError
         {
             this.ids = new Id[ids.length()];
             int i = 0;
@@ -16,7 +16,7 @@ namespace Utaha.Core
             storage = Storage.get_storage();
         }
 
-        public Task? next()
+        public Task? next() throws StorableError, StorageError
         {
             if (index < ids.length)
                 return storage.get_task(ids[index++]);

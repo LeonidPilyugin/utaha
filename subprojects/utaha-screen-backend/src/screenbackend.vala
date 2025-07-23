@@ -50,8 +50,6 @@ namespace Utaha.ScreenBackend
 
     public sealed class Backend : Utaha.Core.Backend
     {
-        private Screen screen = Screen.get_instance();
-
         public override void load() { }
         public override void dump() { }
 
@@ -64,7 +62,7 @@ namespace Utaha.ScreenBackend
         {
             try
             {
-                screen.submit(id.uuid, command);
+                Screen.get_instance().submit(id.uuid, command);
             } catch (ScreenError e)
             {
                 throw new Utaha.Core.BackendError.ERROR(@"Failed to submit process: $(e.message)");
@@ -75,7 +73,7 @@ namespace Utaha.ScreenBackend
         {
             try
             {
-                screen.cancel(id.uuid);
+                Screen.get_instance().cancel(id.uuid);
             } catch (ScreenError e)
             {
                 throw new Utaha.Core.BackendError.ERROR(@"Failed to cancel process: $(e.message)");
@@ -87,7 +85,7 @@ namespace Utaha.ScreenBackend
             Session? session;
             try
             {
-                session = screen.find_session(id.uuid);
+                session = Screen.get_instance().find_session(id.uuid);
             } catch (ScreenError e)
             {
                 throw new Utaha.Core.BackendError.ERROR(@"Falied to find session: $(e.message)");

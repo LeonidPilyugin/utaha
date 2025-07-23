@@ -33,7 +33,7 @@ namespace Utaha.ScreenBackend
         private Regex session_regex;
         private List<Session> sessions;
 
-        private Screen()
+        private Screen() throws ScreenError
         {
             try
             {
@@ -46,7 +46,7 @@ namespace Utaha.ScreenBackend
             reload();
         }
 
-        public static Screen get_instance()
+        public static Screen get_instance() throws ScreenError
         {
             if (instance == null)
                 instance = new Screen();

@@ -20,6 +20,7 @@ namespace Utaha.Core
             ht.insert("id", taskdata.id.uuid);
             ht.insert("alias", taskdata.alias);
             ht.insert("comment", taskdata.comment);
+            ht.insert("birth date", taskdata.birth_date.to_string());
 
             var bht = backend_status.as_hash_table();
             foreach (unowned string key in bht.get_keys())
