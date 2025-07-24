@@ -4,9 +4,10 @@ namespace Utaha.DefaultWrapper
     {
         public string[] command { get; private set; }
 
-        public WrapperStatus(string[] command)
+        public WrapperStatus(string[] command, DateTime? last_active)
         {
             this.command = command;
+            this.last_active = last_active;
         }
 
         public override HashTable<string, string> as_hash_table()
@@ -63,7 +64,14 @@ namespace Utaha.DefaultWrapper
             {
                 var parser = new Json.Parser();
                 parser.load_from_data(node.read_file("wrapper.json"));
-                init_json(parser.get_root().get_object());
+                var object = parser.get_root().get_object();
+                init_json(object);
+
+                if (!object.has_member("last_active"))
+                    last_active = null;
+                else
+                    last_active = new DateTime.from_unix_local(object.get_int_member("last_active"));
+
                 launcher = new SubprocessLauncher(GLib.SubprocessFlags.NONE);
                 launcher.set_environ(Environ.get());
                 launcher.set_stdout_file_path(node.build("stdout"));
@@ -93,6 +101,12 @@ namespace Utaha.DefaultWrapper
                     builder.add_string_value(str);
                 builder.end_array();
 
+                if (null != last_active)
+                {
+                    builder.set_member_name("last_active");
+                    builder.add_int_value(last_active.to_unix());
+                }
+
                 builder.end_object();
 
                 Json.Generator generator = new Json.Generator();
@@ -111,7 +125,8 @@ namespace Utaha.DefaultWrapper
         public override Utaha.Core.WrapperStatus status()
         {
             return new WrapperStatus(
-                command
+                command,
+                last_active
             );
         }
 

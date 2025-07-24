@@ -103,7 +103,8 @@ namespace Utaha.App
                 @foreach((task) => {
                     try
                     {
-                        task.status();
+                        var st = task.status();
+                        stdout.printf(@"$(st.taskdata.id.uuid) -> $(st.wrapper_status.last_active)");
                     } catch (Utaha.Core.BackendError e)
                     {
                         throw new ApplicationError.ERROR(e.message);
