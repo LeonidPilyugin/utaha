@@ -3,11 +3,11 @@ namespace Utaha.App
     public class Application : Object
     {
         private Options options;
-        private Array<Selector> selectors;
+        private List<Selector> selectors;
 
         public Application()
         {
-            selectors = new Array<Selector>();
+            selectors = new List<Selector>();
         }
 
         public void load_modules() throws ApplicationError
@@ -124,7 +124,7 @@ namespace Utaha.App
         {
             if (options.active)
             {
-                selectors.append_val(new Selector((task) => {
+                selectors.append(new Selector((task) => {
                     try
                     {
                         return task.status().backend_status.active;
@@ -138,7 +138,7 @@ namespace Utaha.App
 
             if (options.inactive)
             {
-                selectors.append_val(new Selector((task) => {
+                selectors.append(new Selector((task) => {
                     try
                     {
                         return !task.status().backend_status.active;

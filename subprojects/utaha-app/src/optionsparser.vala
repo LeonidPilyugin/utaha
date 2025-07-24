@@ -86,7 +86,7 @@ namespace Utaha.App
             context = new OptionContext();
             context.set_help_enabled(true);
 
-            // context.set_description(description_string);
+            // TODO: context.set_description(description_string);
             context.set_summary(summary_string);
 
 			context.add_main_entries(main_options, null);

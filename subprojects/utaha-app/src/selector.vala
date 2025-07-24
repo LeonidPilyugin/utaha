@@ -17,7 +17,7 @@ namespace Utaha.App
             return this.filter(task);
         }
 
-        public static bool all(Utaha.Core.Task task, Array<Selector> selectors)
+        public static bool all(Utaha.Core.Task task, List<Selector> selectors)
         {
             bool selected = true;
             foreach (Selector s in selectors)
