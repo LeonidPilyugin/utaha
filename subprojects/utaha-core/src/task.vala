@@ -71,7 +71,7 @@ namespace Utaha.Core
         {
             if (!backend.status(taskdata.id).active)
                 throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is not active");
-            wrapper.query_stop.begin((obj, res) => { wrapper.query_stop.end(res); });
+            wrapper.query_stop();
         }
 
         public void destroy() throws BackendError, StorableError, TaskError

@@ -30,12 +30,11 @@ namespace Utaha.Core
             }
         }
 
-        public async void query_stop()
+        public void query_stop()
         {
             try
             {
                 node.touch_file("stop");
-                yield;
                 while (node.read_file("stop") != "ack") Thread.usleep(100000);
                 node.remove_file("stop");
             } catch (StorageNodeError e)

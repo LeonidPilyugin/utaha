@@ -4,10 +4,12 @@ namespace Utaha.App
     {
         private Options options;
         private List<Selector> selectors;
+        private Formatter formatter;
 
         public Application()
         {
             selectors = new List<Selector>();
+            formatter = new Formatter();
         }
 
         public void load_modules() throws ApplicationError
@@ -103,8 +105,7 @@ namespace Utaha.App
                 @foreach((task) => {
                     try
                     {
-                        var st = task.status();
-                        stdout.printf(@"$(st.taskdata.id.uuid) -> $(st.wrapper_status.last_active)");
+                        formatter.print_status(task.status());
                     } catch (Utaha.Core.BackendError e)
                     {
                         throw new ApplicationError.ERROR(e.message);
