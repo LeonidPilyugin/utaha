@@ -5,6 +5,7 @@ namespace Utaha.App
         private Options options;
         private List<Selector> selectors;
         private Formatter formatter;
+        private static uint count;
 
         public Application()
         {
@@ -119,6 +120,17 @@ namespace Utaha.App
                 @foreach((task) => {
                     stdout.printf(@"$(task.taskdata.id.uuid)\n");
                 });
+                return;
+            }
+
+            if (options.count)
+            {
+                count = 0;
+                @foreach((task) => {
+                    count++;
+                });
+                stdout.printf(@"$count\n");
+                return;
             }
         }
 

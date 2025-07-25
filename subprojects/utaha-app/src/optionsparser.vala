@@ -10,6 +10,7 @@ namespace Utaha.App
         bool status;
         bool remove;
         bool list;
+        bool count;
         [CCode (array_length = false, array_null_terminated = true)]
         string[]? descriptors;
         Utaha.Core.Id[]? ids;
@@ -47,6 +48,7 @@ namespace Utaha.App
             { "status", '\0', OptionFlags.NONE, OptionArg.NONE, ref status, "Show status of selected tasks", null },
             { "remove", '\0', OptionFlags.NONE, OptionArg.NONE, ref remove, "Remove selected tasks", null },
             { "list", '\0', OptionFlags.NONE, OptionArg.NONE, ref list, "List tasks IDs", null },
+            { "count", '\0', OptionFlags.NONE, OptionArg.NONE, ref count, "Count tasks", null },
             { null }
         };
 
@@ -64,6 +66,7 @@ namespace Utaha.App
         private static bool status = false;
         private static bool remove = false;
         private static bool list = false;
+        private static bool count = false;
         [CCode (array_length = false, array_null_terminated = true)]
         private static string[]? descriptors = null;
         [CCode (array_length = false, array_null_terminated = true)]
@@ -103,7 +106,8 @@ namespace Utaha.App
                     list = list,
                     ids = _ids,
                     aliases = aliases,
-                    alias_regex = _alias_regex
+                    alias_regex = _alias_regex,
+                    count=count
                 };
             } catch (Utaha.Core.IdError e)
             {
