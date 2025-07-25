@@ -5,7 +5,6 @@ namespace Utaha.App
         private Options options;
         private List<Selector> selectors;
         private Formatter formatter;
-        private static uint count;
 
         public Application()
         {
@@ -125,7 +124,7 @@ namespace Utaha.App
 
             if (options.count)
             {
-                count = 0;
+                uint count = 0;
                 @foreach((task) => {
                     count++;
                 });
