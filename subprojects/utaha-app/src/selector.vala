@@ -34,7 +34,7 @@ namespace Utaha.App
             };
         }
 
-        public Selector.id(Utaha.Core.Id[]? ids)
+        public Selector.id(Utaha.Core.Id[] ids)
         {
             this.filter = (task) => {
                 bool selected = false;
@@ -45,7 +45,7 @@ namespace Utaha.App
             };
         }
 
-        public Selector.alias(string[]? aliases)
+        public Selector.alias(string[] aliases)
         {
             this.filter = (task) => {
                 bool selected = false;
@@ -56,7 +56,7 @@ namespace Utaha.App
             };
         }
 
-        public Selector.alias_regex(Regex? regex)
+        public Selector.alias_regex(Regex regex)
         {
             this.filter = (task) => {
                 return regex.match(task.taskdata.alias);
