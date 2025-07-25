@@ -6,6 +6,8 @@ namespace Utaha.App
 
         private Filter filter;
 
+        private Selector() { }
+
         public Selector.active()
         {
             this.filter = (task) => {
