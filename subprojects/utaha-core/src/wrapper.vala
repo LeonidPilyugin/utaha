@@ -12,6 +12,40 @@ namespace Utaha.Core
 
         public abstract void stop();
 
+        public const string stdout_name = "stdout";
+        public const string stderr_name = "stderr";
+
+        public override void init() throws Utaha.Core.StorableError
+        {
+            base.init();
+            try
+            {
+                node.touch_file("stdout");
+                node.touch_file("stderr");
+            } catch (Utaha.Core.StorageNodeError e)
+            {
+                throw new Utaha.Core.StorableError.STORAGE_ERROR(
+                    @"Could not initialize storage node: $(e.message)"
+                );
+            }
+        }
+
+        public virtual string stdout_path
+        {
+            owned get
+            {
+                return node.build(stdout_name);
+            }
+        }
+
+        public virtual string stderr_path
+        {
+            owned get
+            {
+                return node.build(stderr_name);
+            }
+        }
+
         public virtual bool on_tick() throws WrapperError
         {
             try

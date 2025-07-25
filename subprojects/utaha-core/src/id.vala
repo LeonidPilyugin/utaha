@@ -21,5 +21,10 @@ namespace Utaha.Core
         {
             return Id(Uuid.string_random());
         }
+
+        public static bool equal(Id id1, Id id2)
+        {
+            return str_equal(id1.uuid, id2.uuid);
+        }
     }
 }

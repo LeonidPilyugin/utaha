@@ -125,32 +125,15 @@ namespace Utaha.App
         public void set_selectors()
         {
             if (options.active)
-            {
-                selectors.append(new Selector((task) => {
-                    try
-                    {
-                        return task.status().backend_status.active;
-                    } catch (Utaha.Core.BackendError e)
-                    {
-                        printerr(@"$(e.message)\n");
-                    }
-                    return false;
-                }));
-            }
-
+                selectors.append(new Selector.active());
             if (options.inactive)
-            {
-                selectors.append(new Selector((task) => {
-                    try
-                    {
-                        return !task.status().backend_status.active;
-                    } catch (Utaha.Core.BackendError e)
-                    {
-                        printerr(@"$(e.message)\n");
-                    }
-                    return false;
-                }));
-            }
+                selectors.append(new Selector.inactive());
+            if (options.ids != null)
+                selectors.append(new Selector.id(options.ids));
+            if (options.aliases != null)
+                selectors.append(new Selector.alias(options.aliases));
+            if (options.alias_regex != null)
+                selectors.append(new Selector.alias_regex(options.alias_regex));
         }
 
         public delegate void TaskOperation (Utaha.Core.Task task) throws ApplicationError;

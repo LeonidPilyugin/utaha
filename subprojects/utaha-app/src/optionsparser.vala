@@ -12,6 +12,10 @@ namespace Utaha.App
         bool list;
         [CCode (array_length = false, array_null_terminated = true)]
         string[]? descriptors;
+        Utaha.Core.Id[]? ids;
+        [CCode (array_length = false, array_null_terminated = true)]
+        string[]? aliases;
+        Regex? alias_regex;
 
         public bool load { get { return descriptors != null; } }
     }
@@ -30,6 +34,9 @@ namespace Utaha.App
         {
             { "active", '\0', OptionFlags.NONE, OptionArg.NONE, ref active, "Select only active tasks", null },
             { "inactive", '\0', OptionFlags.NONE, OptionArg.NONE, ref inactive, "Select only inactive tasks", null },
+            { "id", '\0', OptionFlags.NONE, OptionArg.STRING_ARRAY, ref ids, "Select by id", "UUID" },
+            { "alias", '\0', OptionFlags.NONE, OptionArg.STRING_ARRAY, ref aliases, "Select by alias", "ALIAS" },
+            { "alias-regex", '\0', OptionFlags.NONE, OptionArg.STRING, ref alias_regex, "Select by alias regex", "REGEX" },
             { null }
         };
 
@@ -59,21 +66,52 @@ namespace Utaha.App
         private static bool list = false;
         [CCode (array_length = false, array_null_terminated = true)]
         private static string[]? descriptors = null;
+        [CCode (array_length = false, array_null_terminated = true)]
+        private static string[]? ids = null;
+        [CCode (array_length = false, array_null_terminated = true)]
+        private static string[]? aliases = null;
+        private static string? alias_regex = null;
 
-        private static Options get_options()
+        private static Options get_options() throws OptionError
         {
-            return Options()
+            try
             {
-                version = version,
-                active = active,
-                inactive = inactive,
-                start = start,
-                stop = stop,
-                status = status,
-                remove = remove,
-                descriptors = descriptors,
-                list = list
-            };
+                Utaha.Core.Id[]? _ids = null;
+                if (ids != null)
+                {
+                    _ids = {};
+                    foreach (unowned var id in ids)
+                        _ids += Utaha.Core.Id.from_string(id);
+                }
+
+                Regex? _alias_regex = null;
+                if (alias_regex != null)
+                {
+                    _alias_regex = new Regex(alias_regex);
+                }
+
+                return Options()
+                {
+                    version = version,
+                    active = active,
+                    inactive = inactive,
+                    start = start,
+                    stop = stop,
+                    status = status,
+                    remove = remove,
+                    descriptors = descriptors,
+                    list = list,
+                    ids = _ids,
+                    aliases = aliases,
+                    alias_regex = _alias_regex
+                };
+            } catch (Utaha.Core.IdError e)
+            {
+                throw new OptionError.BAD_VALUE(@"$(e.message)");
+            } catch (RegexError e)
+            {
+                throw new OptionError.BAD_VALUE(@"Regex failed: $(e.message)");
+            }
         }
 
         private static OptionContext context;

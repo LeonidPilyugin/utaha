@@ -50,6 +50,20 @@ namespace Utaha.ScreenBackend
 
     public sealed class Backend : Utaha.Core.Backend
     {
+        public override void init() throws Utaha.Core.StorableError
+        {
+            base.init();
+            try
+            {
+                node?.touch_file("log");
+            } catch (Utaha.Core.StorageNodeError e)
+            {
+                throw new Utaha.Core.StorableError.STORAGE_ERROR(
+                    @"Could not initialize storage node: $(e.message)"
+                );
+            }
+        }
+
         public override void load() { }
         public override void dump() { }
 
@@ -62,7 +76,7 @@ namespace Utaha.ScreenBackend
         {
             try
             {
-                Screen.get_instance().submit(id.uuid, command);
+                Screen.get_instance().submit(id.uuid, command, node.build("log"));
             } catch (ScreenError e)
             {
                 throw new Utaha.Core.BackendError.ERROR(@"Failed to submit process: $(e.message)");

@@ -65,6 +65,8 @@ namespace Utaha.Core
         public void start() throws BackendError
         {
             backend.submit(taskdata.id);
+            taskdata.start_date = new DateTime.now();
+            dump();
         }
 
         public void stop() throws BackendError, TaskError
@@ -91,7 +93,13 @@ namespace Utaha.Core
 
         public TaskStatus status() throws BackendError
         {
-            return new TaskStatus(taskdata, backend.status(taskdata.id), wrapper.status());
+            return new TaskStatus(
+                taskdata,
+                backend.status(taskdata.id),
+                wrapper.status(),
+                wrapper.stdout_path,
+                wrapper.stderr_path
+            );
         }
 
         protected void init_json(Json.Object object) throws JsonableError

@@ -96,12 +96,12 @@ namespace Utaha.ScreenBackend
             return new Session(null, null);
         }
 
-        public void submit(string id, string[] command) throws ScreenError
+        public void submit(string id, string[] command, string log) throws ScreenError
         {
             string sout, serr;
             int status;
 
-            string cmd = "screen -dmS " + Shell.quote(id);
+            string cmd = "screen -dmSL " + Shell.quote(id) + " -Logfile " + Shell.quote(log);
             foreach (unowned string str in command)
                 cmd += " " + Shell.quote(str);
 

@@ -48,8 +48,6 @@ namespace Utaha.DefaultWrapper
             try
             {
                 node.touch_file("wrapper.json");
-                node.touch_file("stdout");
-                node.touch_file("stderr");
             } catch (Utaha.Core.StorageNodeError e)
             {
                 throw new Utaha.Core.StorableError.STORAGE_ERROR(
