@@ -1,0 +1,10 @@
+[wrap-file]
+directory = valadoc-0.36.2
+source_url = https://download.gnome.org/sources/valadoc/0.36/valadoc-0.36.2.tar.xz
+source_filename = valadoc-0.36.2.tar.xz
+source_hash = 30fd74fa65003fcbbaec90bd607110062dc0c883a8766a9c249ff853d7d4ca41
+wrapdb_version = 0.36.2-0
+
+[provide]
+dependency_names = valadoc
+program_names = valadoc
