@@ -93,18 +93,8 @@ namespace Utaha.App
                 Utaha.Core.Task? task;
 
                 while (null != (task = iter.next()))
-                {
                     if (Selector.all(task, selectors))
-                    {
-                        try
-                        {
-                            operation.perform(task);
-                        } catch (OperationError e)
-                        {
-                            printerr(e.message + "\n");
-                        }
-                    }
-                }
+                        operation.try_perform(task);
             } catch (Utaha.Core.StorageError e)
             {
                 throw new ApplicationError.ERROR(e.message);

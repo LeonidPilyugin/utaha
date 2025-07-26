@@ -88,5 +88,11 @@ namespace Utaha.App
         {
             this.operation(task);
         }
+
+        public void try_perform(Utaha.Core.Task task)
+        {
+            try { perform(task); }
+            catch (OperationError e) { printerr(e.message); }
+        }
     }
 }
