@@ -3,6 +3,7 @@ namespace Utaha.Core
     public abstract class BackendStatus : Status
     {
         public bool active { get; protected set; }
+        public Type backend_type { get; protected set; }
 
         public override HashTable<string, string> as_hash_table()
         {

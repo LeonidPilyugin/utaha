@@ -6,6 +6,7 @@ namespace Utaha.DefaultWrapper
 
         public WrapperStatus(string[] command, DateTime? last_active)
         {
+            wrapper_type = typeof(Wrapper);
             this.command = command;
             this.last_active = last_active;
         }

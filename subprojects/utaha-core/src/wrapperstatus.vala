@@ -3,6 +3,7 @@ namespace Utaha.Core
     public abstract class WrapperStatus : Status
     {
         public DateTime? last_active { get; protected set; }
+        public Type wrapper_type { get; protected set; }
 
         public override HashTable<string, string> as_hash_table()
         {

@@ -36,6 +36,7 @@ namespace Utaha.ScreenBackend
 
         public BackendStatus(bool active, int? pid)
         {
+            backend_type = typeof(Backend);
             this.pid = pid;
             this.active = active;
         }

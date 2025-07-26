@@ -89,11 +89,29 @@ namespace Utaha.App
             print(tail_file(tail_lines, status.stderr_path), 2 * offset);
         }
 
+        private void print_backend_status(Utaha.Core.TaskStatus status)
+        {
+            print(status.backend_status.backend_type.name() + " backend:", offset);
+            var ht = status.backend_status.as_hash_table();
+            foreach (unowned var key in ht.get_keys())
+                print(key + ": " + ht.get(key), 2 * offset);
+        }
+
+        private void print_wrapper_status(Utaha.Core.TaskStatus status)
+        {
+            print(status.wrapper_status.wrapper_type.name() + " wrapper:", offset);
+            var ht = status.wrapper_status.as_hash_table();
+            foreach (unowned var key in ht.get_keys())
+                print(key + ": " + ht.get(key), 2 * offset);
+        }
+
         public void print_status(Utaha.Core.TaskStatus status) throws FormatterError
         {
             print_header(status);
             print_loaded(status);
             print_active(status);
+            print_backend_status(status);
+            print_wrapper_status(status);
             print_stdout(status);
             print_stderr(status);
         }
