@@ -61,7 +61,7 @@ namespace Utaha.App
                 error("Tail failed");
 
             stream.printf("stdout:\n");
-            stream.printf(sout);
+            stream.printf(sout + "\n");
 
             try
             {
@@ -77,7 +77,7 @@ namespace Utaha.App
                 error("Tail failed");
 
             stream.printf("stderr:\n");
-            stream.printf(sout);
+            stream.printf(sout + "\n");
 
         }
 
