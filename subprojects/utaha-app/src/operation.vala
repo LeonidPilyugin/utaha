@@ -72,7 +72,7 @@ namespace Utaha.App
         public Operation.list()
         {
             this.operation = (task) => {
-                stdout.printf(@"$(task.taskdata.id.uuid)\n");
+                stdout.printf(@"$(task.taskdata.id.uuid): $(task.taskdata.alias)\n");
             };
         }
 
