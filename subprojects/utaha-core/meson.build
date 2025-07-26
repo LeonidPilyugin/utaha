@@ -14,7 +14,9 @@ dependencies = [
   dependency('gobject-2.0'),
   dependency('gio-2.0'),
   dependency('gmodule-2.0'),
+  meson.get_compiler('vala').find_library('gmodule-2.0'),
   dependency('json-glib-1.0'),
+  meson.get_compiler('vala').find_library('json-glib-1.0'),
 ]
 
 subdir('src')
