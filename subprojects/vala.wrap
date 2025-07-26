@@ -1,0 +1,10 @@
+[wrap-file]
+directory = vala-0.56.18
+source_url = https://download.gnome.org/sources/vala/0.56/vala-0.56.18.tar.xz
+source_filename = vala-0.56.18.tar.xz
+source_hash = f2affe7d40ab63db8e7b9ecc3f6bdc9c2fc7e3134c84ff2d795f482fe926a382
+wrapdb_version = 0.56.18-0
+
+[provide]
+dependency_names = vala
+program_names = valac
