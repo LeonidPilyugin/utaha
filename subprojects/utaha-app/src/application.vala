@@ -48,88 +48,26 @@ namespace Utaha.App
             }
 
             set_selectors();
+            perform_operation();
+        }
 
+        public void perform_operation() throws ApplicationError
+        {
             if (options.start)
-            {
-                @foreach((task) => {
-                    try
-                    {
-                        task.start();
-                    } catch (Utaha.Core.BackendError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    }
-                });
-                return;
-            }
-
-            if (options.stop)
-            {
-                @foreach((task) => {
-                    try
-                    {
-                        task.stop();
-                    } catch (Utaha.Core.BackendError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    } catch (Utaha.Core.TaskError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    }
-                });
-                return;
-            }
-
-            if (options.remove)
-            {
-                @foreach((task) => {
-                    try
-                    {
-                        task.destroy();
-                    } catch (Utaha.Core.BackendError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    } catch (Utaha.Core.TaskError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    } catch (Utaha.Core.StorableError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    }
-                });
-                return;
-            }
-
-            if (options.status)
-            {
-                @foreach((task) => {
-                    try
-                    {
-                        formatter.print_status(task.status());
-                    } catch (Utaha.Core.BackendError e)
-                    {
-                        throw new ApplicationError.ERROR(e.message);
-                    }
-                });
-                return;
-            }
-
-            if (options.list)
-            {
-                @foreach((task) => {
-                    stdout.printf(@"$(task.taskdata.id.uuid)\n");
-                });
-                return;
-            }
-
-            if (options.count)
+                @foreach(new Operation.start());
+            else if (options.stop)
+                @foreach(new Operation.stop());
+            else if (options.remove)
+                @foreach(new Operation.remove());
+            else if (options.status)
+                @foreach(new Operation.status(formatter));
+            else if (options.list)
+                @foreach(new Operation.list());
+            else if (options.count)
             {
                 uint count = 0;
-                @foreach((task) => {
-                    count++;
-                });
+                @foreach(new Operation.count(&count));
                 stdout.printf(@"$count\n");
-                return;
             }
         }
 
@@ -147,9 +85,7 @@ namespace Utaha.App
                 selectors.append(new Selector.alias_regex(options.alias_regex));
         }
 
-        public delegate void TaskOperation (Utaha.Core.Task task) throws ApplicationError;
-
-        public void @foreach(TaskOperation operation)
+        public void @foreach(Operation operation) throws ApplicationError
         {
             try
             {
@@ -162,8 +98,8 @@ namespace Utaha.App
                     {
                         try
                         {
-                            operation(task);
-                        } catch (ApplicationError e)
+                            operation.perform(task);
+                        } catch (OperationError e)
                         {
                             printerr(e.message + "\n");
                         }
@@ -171,10 +107,10 @@ namespace Utaha.App
                 }
             } catch (Utaha.Core.StorageError e)
             {
-                printerr(e.message + "\n");
+                throw new ApplicationError.ERROR(e.message);
             } catch (Utaha.Core.StorableError e)
             {
-                printerr(e.message + "\n");
+                throw new ApplicationError.ERROR(e.message);
             }
         }
 
