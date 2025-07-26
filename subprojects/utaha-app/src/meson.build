@@ -6,5 +6,6 @@ sources = files(
   'operationerror.vala',
   'optionsparser.vala',
   'selector.vala',
+  'selectoriterator.vala',
   'version.vala',
 )

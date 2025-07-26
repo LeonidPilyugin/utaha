@@ -89,12 +89,11 @@ namespace Utaha.App
         {
             try
             {
-                var iter = Utaha.Core.Storage.get_storage().iterator();
+                var iter = new SelectorIterator(Utaha.Core.Storage.get_storage().iterator(), selectors);
                 Utaha.Core.Task? task;
 
                 while (null != (task = iter.next()))
-                    if (Selector.all(task, selectors))
-                        operation.try_perform(task);
+                    operation.try_perform(task);
             } catch (Utaha.Core.StorageError e)
             {
                 throw new ApplicationError.ERROR(e.message);
