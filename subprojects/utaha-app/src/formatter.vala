@@ -4,81 +4,98 @@ namespace Utaha.App
     {
         private unowned FileStream stream = stdout;
         private string date_format = "%H:%M:%S %d.%m.%y";
+        private uint offset = 4;
+        private uint tail_lines = 5;
 
-        public void print_status(Utaha.Core.TaskStatus status)
+        private void print(string str, uint offset=0)
         {
-            stream.printf(@"Task \"$(status.taskdata.alias)\" ($(status.taskdata.id.uuid))\n");
-            stream.printf(@"$(status.taskdata.comment)\n");
+            foreach (unowned var s in str.split("\n"))
+            {
+                for (uint i = 0; i < offset; i++) stream.puts(" ");
+                stream.puts(s);
+                stream.puts("\n");
+            }
+        }
 
-            stream.printf("\n");
+        private void print_header(Utaha.Core.TaskStatus status)
+        {
+            print(@"Task \"$(status.taskdata.alias)\" ($(status.taskdata.id.uuid))");
+            print(@"$(status.taskdata.comment)", offset);
+        }
 
-            stream.printf(@"Loaded: ");
+        private void print_loaded(Utaha.Core.TaskStatus status)
+        {
             var load_date = status.taskdata.load_date;
-            stream.printf(@"$(load_date.format(date_format)) ($(difference(load_date)) ago)");
-            stream.printf("\n");
+            string line;
+            line = "Loaded: ";
+            line += load_date.format(date_format);
+            line += @" ($(difference(load_date)) ago)";
+            print(line, offset);
+        }
 
-            stream.printf("Active: ");
-
+        private void print_active(Utaha.Core.TaskStatus status)
+        {
+            string line = "Active: ";
             if (status.backend_status.active)
             {
-                stream.printf("\x1b[32mactive\x1b[0m");
+                line += "\x1b[32mactive\x1b[0m";
                 if (status.taskdata.start_date != null)
                 {
                     var d = status.taskdata.start_date;
-                    stream.printf(@" since $(d.format(date_format)) (");
-                    stream.printf(@"$(difference(d)) ago)");
+                    line += @" since $(d.format(date_format)) (";
+                    line += @"$(difference(d)) ago)";
                 }
-                stream.printf("\n");
-            }
-            else
+            } else
             {
-                stream.printf("\x1b[31minactive\x1b[0m");
+                line += "\x1b[31minactive\x1b[0m";
                 if (status.wrapper_status.last_active != null)
                 {
                     var d = status.wrapper_status.last_active;
-                    stream.printf(@" since $(d.format(date_format)) (");
-                    stream.printf(@"$(difference(d)) ago)");
+                    line += @" since $(d.format(date_format)) (";
+                    line += @"$(difference(d)) ago)";
                 }
-                stream.printf("\n");
             }
+            print(line, offset);
+        }
 
-            stream.printf("\n");
-
-            string sout, serr;
-            int rv;
-
+        private string tail_file(uint lines, string path) throws FormatterError
+        {
             try
             {
+                string sout, serr;
+                int status;
                 Process.spawn_command_line_sync(
-                    @"tail -5 $(status.stdout_path)", out sout, out serr, out rv
+                    @"tail -$lines $path", out sout, out serr, out status
                 );
+
+                if (status != 0) throw new FormatterError.ERROR("Tail failed");
+
+                return sout;
             } catch (SpawnError e)
             {
-                error("Cannot spawn tail process");
+                throw new FormatterError.ERROR(e.message);
             }
+        }
 
-            if (rv != 0)
-                error("Tail failed");
+        private void print_stdout(Utaha.Core.TaskStatus status) throws FormatterError
+        {
+            print("stdout:", offset);
+            print(tail_file(tail_lines, status.stdout_path), 2 * offset);
+        }
 
-            stream.printf("stdout:\n");
-            stream.printf(sout + "\n");
+        private void print_stderr(Utaha.Core.TaskStatus status) throws FormatterError
+        {
+            print("stderr:", offset);
+            print(tail_file(tail_lines, status.stderr_path), 2 * offset);
+        }
 
-            try
-            {
-                Process.spawn_command_line_sync(
-                    @"tail -5 $(status.stderr_path)", out sout, out serr, out rv
-                );
-            } catch (SpawnError e)
-            {
-                error("Cannot spawn tail process");
-            }
-
-            if (rv != 0)
-                error("Tail failed");
-
-            stream.printf("stderr:\n");
-            stream.printf(sout + "\n");
-
+        public void print_status(Utaha.Core.TaskStatus status) throws FormatterError
+        {
+            print_header(status);
+            print_loaded(status);
+            print_active(status);
+            print_stdout(status);
+            print_stderr(status);
         }
 
         private string difference(DateTime d)
