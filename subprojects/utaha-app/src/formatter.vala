@@ -60,7 +60,25 @@ namespace Utaha.App
             if (rv != 0)
                 error("Tail failed");
 
+            stream.printf("stdout:\n");
             stream.printf(sout);
+
+            try
+            {
+                Process.spawn_command_line_sync(
+                    @"tail -5 $(status.stderr_path)", out sout, out serr, out rv
+                );
+            } catch (SpawnError e)
+            {
+                error("Cannot spawn tail process");
+            }
+
+            if (rv != 0)
+                error("Tail failed");
+
+            stream.printf("stderr:\n");
+            stream.printf(sout);
+
         }
 
         private string difference(DateTime d)
