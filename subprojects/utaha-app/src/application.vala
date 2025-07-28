@@ -3,12 +3,12 @@ namespace Utaha.App
     public class Application : Object
     {
         private Options options;
-        private List<Selector> selectors;
         private Formatter formatter;
+        private SelectorIteratorBuilder selectors;
 
         public Application()
         {
-            selectors = new List<Selector>();
+            selectors = new SelectorIteratorBuilder();
             formatter = new Formatter();
         }
 
@@ -74,22 +74,22 @@ namespace Utaha.App
         public void set_selectors()
         {
             if (options.active)
-                selectors.append(new Selector.active());
+                selectors.add_selector(new Selector.active());
             if (options.inactive)
-                selectors.append(new Selector.inactive());
+                selectors.add_selector(new Selector.inactive());
             if (options.ids != null)
-                selectors.append(new Selector.id(options.ids));
+                selectors.add_selector(new Selector.id(options.ids));
             if (options.aliases != null)
-                selectors.append(new Selector.alias(options.aliases));
+                selectors.add_selector(new Selector.alias(options.aliases));
             if (options.alias_regex != null)
-                selectors.append(new Selector.alias_regex(options.alias_regex));
+                selectors.add_selector(new Selector.alias_regex(options.alias_regex));
         }
 
         public void @foreach(Operation operation) throws ApplicationError
         {
             try
             {
-                var iter = new SelectorIterator(Utaha.Core.Storage.get_storage().iterator(), selectors);
+                var iter = selectors.build(Utaha.Core.Storage.get_storage().iterator());
                 Utaha.Core.Task? task;
 
                 while (null != (task = iter.next()))

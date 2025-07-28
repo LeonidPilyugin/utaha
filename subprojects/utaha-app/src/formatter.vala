@@ -124,7 +124,7 @@ namespace Utaha.App
             diff /= 60;
             var minutes = diff % 60;
             diff /= 60;
-            var hours = diff % 60;
+            var hours = diff % 24;
             var days = diff / 24;
 
             string result = "";

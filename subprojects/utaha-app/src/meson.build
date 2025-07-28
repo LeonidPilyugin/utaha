@@ -8,5 +8,6 @@ sources = files(
   'optionsparser.vala',
   'selector.vala',
   'selectoriterator.vala',
+  'selectoriteratorbuilder.vala',
   'version.vala',
 )
