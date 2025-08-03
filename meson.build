@@ -19,6 +19,7 @@ subprojects = [
   [ 'utaha-app', { } ],
   [ 'utaha-default-wrapper', { } ],
   [ 'utaha-screen-backend', { } ],
+  [ 'utaha-posix-backend', { } ],
 ]
 
 subproject_objects = [ ]
