@@ -24,20 +24,21 @@ namespace Utaha.ScreenBackend
         }
     }
 
-    [Immutable]
     public sealed class BackendStatus : Utaha.Core.BackendStatus
     {
         private int? pid;
+        private Utaha.Core.Id? id;
 
         public int? get_pid()
         {
             return pid;
         }
 
-        public BackendStatus(bool active, int? pid)
+        public BackendStatus(bool active, int? pid, Utaha.Core.Id? id)
         {
             backend_type = typeof(Backend);
             this.pid = pid;
+            this.id = id;
             this.active = active;
         }
 
@@ -45,12 +46,15 @@ namespace Utaha.ScreenBackend
         {
             var ht = base.as_hash_table();
             if (pid != null) ht.insert("pid", pid.to_string());
+            if (id != null) ht.insert("id", id.uuid);
             return ht;
         }
     }
 
     public sealed class Backend : Utaha.Core.Backend
     {
+        private Utaha.Core.Id? id = null;
+
         public override void init() throws Utaha.Core.StorableError
         {
             base.init();
@@ -65,18 +69,41 @@ namespace Utaha.ScreenBackend
             }
         }
 
-        public override void load() { }
-        public override void dump() { }
+        public override void load() throws Utaha.Core.StorableError
+        {
+            try
+            {
+                base.load();
+                if (node.file_exists("id"))
+                    id = Utaha.Core.Id.from_string(
+                        node.read_file("id")
+                    );
+            } catch (Utaha.Core.StorageNodeError e)
+            {
+                throw new Utaha.Core.StorableError.ERROR(e.message);
+            } catch (Utaha.Core.IdError e)
+            {
+                throw new Utaha.Core.StorableError.ERROR(e.message);
+            }
+        }
+
+        public override void dump() throws Utaha.Core.StorableError
+        {
+            base.dump();
+            if (null != this.id)
+                node.write_file("id", id.uuid);
+        }
 
         public override Utaha.Core.BackendHealthReport healthcheck()
         {
             return new BackendHealthReport();
         }
 
-        public override void _submit(Utaha.Core.Id id, string[] command) throws Utaha.Core.BackendError
+        public override void _submit(string[] command) throws Utaha.Core.BackendError
         {
             try
             {
+                id = Utaha.Core.Id.generate();
                 Screen.get_instance().submit(id.uuid, command, node.build("log"));
             } catch (ScreenError e)
             {
@@ -84,7 +111,7 @@ namespace Utaha.ScreenBackend
             }
         }
 
-        public override void _cancel(Utaha.Core.Id id) throws Utaha.Core.BackendError
+        public override void _cancel() throws Utaha.Core.BackendError
         {
             try
             {
@@ -95,18 +122,18 @@ namespace Utaha.ScreenBackend
             }
         }
 
-        public override Utaha.Core.BackendStatus status(Utaha.Core.Id id) throws Utaha.Core.BackendError
+        public override Utaha.Core.BackendStatus status() throws Utaha.Core.BackendError
         {
             Session? session;
             try
             {
-                session = Screen.get_instance().find_session(id.uuid);
+                session = null == id ? new Session(null, null) : Screen.get_instance().find_session(id.uuid);
             } catch (ScreenError e)
             {
                 throw new Utaha.Core.BackendError.ERROR(@"Falied to find session: $(e.message)");
             }
 
-            return new BackendStatus(session.get_pid() != null, session.get_pid());
+            return new BackendStatus(session.get_pid() != null, session.get_pid(), id);
         }
 
         protected override void init_json(Json.Object object) throws Utaha.Core.JsonableError { }

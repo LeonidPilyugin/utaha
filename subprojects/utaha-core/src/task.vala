@@ -62,8 +62,10 @@ namespace Utaha.Core
             base.dump();
         }
 
-        public void start() throws BackendError
+        public void start() throws BackendError, TaskError
         {
+            if (backend.status().active)
+                throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is already active");
             backend.submit(taskdata.id);
             taskdata.start_date = new DateTime.now();
             dump();
@@ -71,14 +73,14 @@ namespace Utaha.Core
 
         public void stop() throws BackendError, TaskError
         {
-            if (!backend.status(taskdata.id).active)
+            if (!backend.status().active)
                 throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is not active");
             wrapper.query_stop();
         }
 
         public void destroy() throws BackendError, StorableError, TaskError
         {
-            if (backend.status(taskdata.id).active)
+            if (backend.status().active)
                 throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is active");
             remove();
         }
@@ -95,7 +97,7 @@ namespace Utaha.Core
         {
             return new TaskStatus(
                 taskdata,
-                backend.status(taskdata.id),
+                backend.status(),
                 wrapper.status(),
                 wrapper.stdout_path,
                 wrapper.stderr_path
