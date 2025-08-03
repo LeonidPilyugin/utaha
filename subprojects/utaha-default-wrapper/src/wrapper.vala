@@ -179,7 +179,7 @@ namespace Utaha.DefaultWrapper
         {
             var result = new HashTable<ProcessSignal?, SignalHandlerMethod>(int_hash, int_equal);
             result.insert(ProcessSignal.TERM, on_term);
-            result.insert(ProcessSignal.HUP, on_term);
+            result.insert(ProcessSignal.HUP, null);
             return result;
         }
     }

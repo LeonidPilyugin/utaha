@@ -32,7 +32,7 @@ static void on_signal(int signal)
     if (handlers.contains(signal))
     {
         var func = handlers.get(signal);
-        func(task.wrapper, signal);
+        if (null != func) func(task.wrapper, signal);
     }
 }
 
