@@ -1,6 +1,6 @@
 namespace Utaha.Core
 {
-    public sealed class Storage
+    public sealed class Storage : Object, Gee.Traversable<Task>, Gee.Iterable<Task>
     {
         private StorageNode node;
         private static Storage? storage = null;
@@ -95,18 +95,85 @@ namespace Utaha.Core
             }
         }
 
-        public TaskIterator iterator() throws StorageError
+        private class Iterator : Object, Gee.Traversable<Task>, Gee.Iterator<Task>
+        {
+            private Id[] ids;
+            private int index;
+            private Storage storage;
+
+            public Iterator(List<string> ids) throws IdError, StorageError
+            {
+                this.ids = new Id[ids.length()];
+                int i = 0;
+                foreach (unowned var id in ids)
+                    this.ids[i++] = Id.from_string(id);
+                index = -1;
+                storage = Storage.get_storage();
+            }
+
+            public bool read_only { get { return true; } }
+
+            public bool valid
+            {
+                get
+                {
+                    return index >= 0 && index < ids.length;
+                }
+            }
+
+            public Task get()
+            {
+                try
+                {
+                    return storage.get_task(ids[index]);
+                } catch (StorableError e)
+                {
+                    assert_not_reached();
+                } catch (StorageError e)
+                {
+                    assert_not_reached();
+                }
+            }
+
+            public bool has_next()
+            {
+                return index + 1 < ids.length;
+            }
+
+            public bool next()
+            {
+                index++;
+                return valid;
+            }
+
+            public void remove() { }
+
+            public bool @foreach(Gee.ForallFunc<Task> f)
+            {
+                bool result = true;
+                while (next())
+                    if (!(result &= f(get()))) break;
+                return result;
+            }
+        }
+
+        public Gee.Iterator<Task> iterator()
         {
             try
             {
-                return new TaskIterator(node.list_children());
+                return new Iterator(node.list_children());
             } catch (StorageNodeError e)
             {
-                throw new StorageError.ERROR(e.message);
+                assert_not_reached();
             } catch (IdError e)
             {
-                throw new StorageError.ERROR(e.message);
+                assert_not_reached();
             }
+        }
+
+        public bool @foreach(Gee.ForallFunc<Task> f)
+        {
+            return iterator().@foreach(f);
         }
     }
 }

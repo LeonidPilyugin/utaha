@@ -1,28 +1,11 @@
 sources = files(
-  'backend.vala',
-  'backenderror.vala',
-  'backendhealthreport.vala',
-  'backendstatus.vala',
-  'id.vala',
-  'iderror.vala',
   'jsonable.vala',
-  'loadmodules.vala',
-  'module.vala',
-  'moduleerror.vala',
-  'moduleloader.vala',
-  'storable.vala',
-  'storableerror.vala',
-  'status.vala',
-  'storage.vala',
-  'storageerror.vala',
-  'storagenode.vala',
-  'storagenodeerror.vala',
-  'task.vala',
-  'taskdata.vala',
-  'taskerror.vala',
-  'taskiterator.vala',
-  'taskstatus.vala',
-  'wrapper.vala',
-  'wrappererror.vala',
-  'wrapperstatus.vala',
 )
+
+subdir('backend')
+subdir('id')
+subdir('module')
+subdir('status')
+subdir('storage')
+subdir('task')
+subdir('wrapper')

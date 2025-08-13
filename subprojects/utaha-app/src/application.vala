@@ -4,11 +4,11 @@ namespace Utaha.App
     {
         private Options options;
         private Formatter formatter;
-        private SelectorIteratorBuilder selectors;
+        private Selection selection;
 
         public Application()
         {
-            selectors = new SelectorIteratorBuilder();
+            selection = new Selection(Utaha.Core.Storage.get_storage().iterator());
             formatter = new Formatter();
         }
 
@@ -74,33 +74,21 @@ namespace Utaha.App
         public void set_selectors()
         {
             if (options.active)
-                selectors.add_selector(new Selector.active());
+                selection.append(new Selector.active());
             if (options.inactive)
-                selectors.add_selector(new Selector.inactive());
+                selection.append(new Selector.inactive());
             if (options.ids != null)
-                selectors.add_selector(new Selector.id(options.ids));
+                selection.append(new Selector.id(options.ids));
             if (options.aliases != null)
-                selectors.add_selector(new Selector.alias(options.aliases));
+                selection.append(new Selector.alias(options.aliases));
             if (options.alias_regex != null)
-                selectors.add_selector(new Selector.alias_regex(options.alias_regex));
+                selection.append(new Selector.alias_regex(options.alias_regex));
         }
 
         public void @foreach(Operation operation) throws ApplicationError
         {
-            try
-            {
-                var iter = selectors.build(Utaha.Core.Storage.get_storage().iterator());
-                Utaha.Core.Task? task;
-
-                while (null != (task = iter.next()))
-                    operation.try_perform(task);
-            } catch (Utaha.Core.StorageError e)
-            {
-                throw new ApplicationError.ERROR(e.message);
-            } catch (Utaha.Core.StorableError e)
-            {
-                throw new ApplicationError.ERROR(e.message);
-            }
+            foreach (var task in selection)
+                operation.try_perform(task);
         }
 
         public void version()
