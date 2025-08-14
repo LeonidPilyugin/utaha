@@ -1,21 +1,17 @@
 namespace Utaha.PosixBackend
 {
-    public sealed class BackendHealthReport : Utaha.Core.BackendHealthReport
-    {
-        public BackendHealthReport()
-        {
-            base(true, "OK");
-        }
-    }
+    // public sealed class BackendHealthReport : Utaha.Core.BackendHealthReport
+    // {
+    //     public BackendHealthReport()
+    //     {
+    //         base(true, "OK");
+    //     }
+    // }
 
     public sealed class BackendStatus : Utaha.Core.BackendStatus
     {
-        private long? pid;
 
-        public long? get_pid()
-        {
-            return pid;
-        }
+        public long? pid { get; private set; }
 
         public BackendStatus(bool active, long? pid)
         {
@@ -24,11 +20,13 @@ namespace Utaha.PosixBackend
             this.active = active;
         }
 
-        public override HashTable<string, string> as_hash_table()
+        public override Utaha.Core.Status.Iterable iter
         {
-            var ht = base.as_hash_table();
-            if (pid != null) ht.insert("pid", pid.to_string());
-            return ht;
+            owned get
+            {
+                return base.iter
+                    .set<string>(new Utaha.Core.Status.Iterable.Key.str("pid"), pid == null ? "" : pid.to_string());
+            }
         }
     }
 
@@ -70,10 +68,10 @@ namespace Utaha.PosixBackend
                 node.write_file("pid", pid.to_string());
         }
 
-        public override Utaha.Core.BackendHealthReport healthcheck()
-        {
-            return new BackendHealthReport();
-        }
+        // public override Utaha.Core.BackendHealthReport healthcheck()
+        // {
+        //     return new BackendHealthReport();
+        // }
 
         public override void _submit(string[] command) throws Utaha.Core.BackendError
         {

@@ -97,8 +97,12 @@ namespace Utaha.Core
         {
             return new TaskStatus(
                 taskdata,
-                backend.status(),
-                wrapper.status(),
+                () => {
+                    return backend.status();
+                },
+                () => {
+                    return wrapper.status();
+                },
                 wrapper.stdout_path,
                 wrapper.stderr_path
             );

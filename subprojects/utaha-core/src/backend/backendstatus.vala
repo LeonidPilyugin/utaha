@@ -5,11 +5,13 @@ namespace Utaha.Core
         public bool active { get; protected set; }
         public Type backend_type { get; protected set; }
 
-        public override HashTable<string, string> as_hash_table()
+        public override Iterable iter
         {
-            var ht = base.as_hash_table();
-            ht.insert("active", active.to_string());
-            return ht;
+            owned get
+            {
+                return base.iter
+                    .set<string>(new Status.Iterable.Key.str("active"), active.to_string());
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Utaha.App
             this.filter = (task) => {
                 try
                 {
-                    return task.status().backend_status.active;
+                    return task.status().backend_status.value.active;
                 } catch (Utaha.Core.BackendError e)
                 {
                     printerr(@"$(e.message)\n");
@@ -27,7 +27,7 @@ namespace Utaha.App
             this.filter = (task) => {
                 try
                 {
-                    return !task.status().backend_status.active;
+                    return !task.status().backend_status.value.active;
                 } catch (Utaha.Core.BackendError e)
                 {
                     printerr(@"$(e.message)\n");

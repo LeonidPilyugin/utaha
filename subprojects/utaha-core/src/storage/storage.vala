@@ -121,7 +121,7 @@ namespace Utaha.Core
                 }
             }
 
-            public Task get()
+            public new Task get()
             {
                 try
                 {

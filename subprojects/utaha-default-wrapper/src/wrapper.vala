@@ -11,11 +11,13 @@ namespace Utaha.DefaultWrapper
             this.last_active = last_active;
         }
 
-        public override HashTable<string, string> as_hash_table()
+        public override Utaha.Core.Status.Iterable iter
         {
-            var ht = base.as_hash_table();
-            ht.set("command", string.joinv(" ", command));
-            return ht;
+            owned get
+            {
+                return base.iter
+                    .set<string>(new Utaha.Core.Status.Iterable.Key.str("command"), string.joinv(" ", command));
+            }
         }
     }
 

@@ -1,40 +1,35 @@
 namespace Utaha.ScreenBackend
 {
-    public sealed class BackendHealthReport : Utaha.Core.BackendHealthReport
-    {
-        public string? screen_path { get; private set; }
-
-        public BackendHealthReport()
-        {
-            screen_path = Environment.find_program_in_path("screen");
-
-            string message = screen_path == null ?
-                "Could not find screen executable in $PATH" :
-                "OK";
-
-            bool ok = screen_path != null;
-            base(ok, message);
-        }
-
-        public override HashTable<string, string> as_hash_table()
-        {
-            var ht = base.as_hash_table();
-            ht.insert("screen-path", screen_path);
-            return ht;
-        }
-    }
+    // public sealed class BackendHealthReport : Utaha.Core.BackendHealthReport
+    // {
+    //     public string? screen_path { get; private set; }
+    //
+    //     public BackendHealthReport()
+    //     {
+    //         screen_path = Environment.find_program_in_path("screen");
+    //
+    //         string message = screen_path == null ?
+    //             "Could not find screen executable in $PATH" :
+    //             "OK";
+    //
+    //         bool ok = screen_path != null;
+    //         base(ok, message);
+    //     }
+    //
+    //     public override HashTable<string, string> as_hash_table()
+    //     {
+    //         var ht = base.as_hash_table();
+    //         ht.insert("screen-path", screen_path);
+    //         return ht;
+    //     }
+    // }
 
     public sealed class BackendStatus : Utaha.Core.BackendStatus
     {
-        private int? pid;
+        public long? pid { get; private set; }
         private Utaha.Core.Id? id;
 
-        public int? get_pid()
-        {
-            return pid;
-        }
-
-        public BackendStatus(bool active, int? pid, Utaha.Core.Id? id)
+        public BackendStatus(bool active, long? pid, Utaha.Core.Id? id)
         {
             backend_type = typeof(Backend);
             this.pid = pid;
@@ -42,12 +37,14 @@ namespace Utaha.ScreenBackend
             this.active = active;
         }
 
-        public override HashTable<string, string> as_hash_table()
+        public override Utaha.Core.Status.Iterable iter
         {
-            var ht = base.as_hash_table();
-            if (pid != null) ht.insert("pid", pid.to_string());
-            if (id != null) ht.insert("id", id.uuid);
-            return ht;
+            owned get
+            {
+                return base.iter
+                    .set<string>(new Utaha.Core.Status.Iterable.Key.str("pid"), pid == null ? "" : pid.to_string())
+                    .set<string>(new Utaha.Core.Status.Iterable.Key.str("id"), id == null ? "" : id.uuid);
+            }
         }
     }
 
@@ -94,10 +91,10 @@ namespace Utaha.ScreenBackend
                 node.write_file("id", id.uuid);
         }
 
-        public override Utaha.Core.BackendHealthReport healthcheck()
-        {
-            return new BackendHealthReport();
-        }
+        // public override Utaha.Core.BackendHealthReport healthcheck()
+        // {
+        //     return new BackendHealthReport();
+        // }
 
         public override void _submit(string[] command) throws Utaha.Core.BackendError
         {

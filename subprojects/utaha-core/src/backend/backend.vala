@@ -2,7 +2,7 @@ namespace Utaha.Core
 {
     public abstract class Backend : Storable, IJsonable
     {
-        public abstract BackendHealthReport healthcheck();
+        // public abstract BackendHealthReport healthcheck();
 
         public void submit(Id id) throws BackendError
         {
