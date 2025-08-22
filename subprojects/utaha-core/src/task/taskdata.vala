@@ -1,6 +1,6 @@
 namespace Utaha.Core
 {
-    public sealed class TaskData : Storable, IJsonable
+    public sealed class TaskData : Storable, Serialization.Initializable
     {
         public Id id { get; private set; }
         public string alias { get; private set; }
@@ -33,20 +33,15 @@ namespace Utaha.Core
         {
             try
             {
-                var parser = new Json.Parser();
-                parser.load_from_data(node.read_file("taskdata.json"));
-                var object = parser.get_root().get_object();
-                init_json(object);
-                if (!object.has_member("id"))
-                    throw new StorableError.ERROR("Corrupted taskdata.json");
-                if (!object.has_member("load_date"))
-                    throw new StorableError.ERROR("Corrupted taskdata.json");
-                id = Id.from_string(object.get_string_member("id"));
-                load_date = new DateTime.from_unix_local(object.get_int_member("load_date"));
+                var el = new Serialization.JsonReader().read(node.read_file("taskdata.json")) as Serialization.TableElement;
+                id = Id.from_string(el.get<Serialization.ValueElement>("id").as<string>());
+                load_date = new DateTime.from_unix_local(el.get<Serialization.ValueElement>("load_date").as<int64?>());
+                alias = el.get<Serialization.ValueElement>("alias").as<string>();
+                comment = el.get<Serialization.ValueElement>("comment").as<string>();
 
                 start_date = null;
-                if (object.has_member("start_date"))
-                    start_date = new DateTime.from_unix_local(object.get_int_member("start_date"));
+                if (el.contains("start_date"))
+                    start_date = new DateTime.from_unix_local(el.get<Serialization.ValueElement>("start_date").as<int64?>());
             } catch (StorageNodeError e)
             {
                 throw new StorableError.STORAGE_ERROR(e.message);
@@ -60,37 +55,18 @@ namespace Utaha.Core
         {
             try
             {
-                Json.Builder builder = new Json.Builder();
-                builder.begin_object();
-
-                builder.set_member_name("id");
-                builder.add_string_value(id.uuid);
-
-                builder.set_member_name("alias");
-                builder.add_string_value(alias);
-
-                builder.set_member_name("comment");
-                builder.add_string_value(comment);
-
-                builder.set_member_name("load_date");
-                builder.add_int_value(load_date.to_unix());
-
-                builder.set_member_name("load_date");
-                builder.add_int_value(load_date.to_unix());
+                var t = new Serialization.TableElement();
+                t["id"] = new Serialization.ValueElement(id.uuid);
+                t["alias"] = new Serialization.ValueElement(alias);
+                t["comment"] = new Serialization.ValueElement(comment);
+                t["load_date"] = new Serialization.ValueElement(load_date.to_unix());
 
                 if (start_date != null)
                 {
-                    builder.set_member_name("start_date");
-                    builder.add_int_value(start_date.to_unix());
+                    t["start_date"] = new Serialization.ValueElement(start_date.to_unix());
                 }
 
-                builder.end_object();
-
-                Json.Generator generator = new Json.Generator();
-                Json.Node root = builder.get_root();
-                generator.set_root(root);
-
-                node.write_file("taskdata.json", generator.to_data(null));
+                node.write_file("taskdata.json", new Serialization.JsonWriter().write(t));
             } catch (StorageNodeError e)
             {
                 throw new StorableError.STORAGE_ERROR(
@@ -99,18 +75,18 @@ namespace Utaha.Core
             }
         }
 
-        protected void init_json(Json.Object object) throws JsonableError
+        protected void _initialize(Serialization.TableElement el) throws Serialization.InitializableError
         {
             id = Id.generate();
             load_date = new DateTime.now();
 
-            if (!object.has_member("alias"))
-                throw new JsonableError.ERROR("Does not have \"alias\" member");
-            if (!object.has_member("comment"))
-                throw new JsonableError.ERROR("Does not have \"comment\" member");
+            if (!el.contains("alias"))
+                throw new Serialization.InitializableError.ERROR("Does not have \"alias\" member");
+            if (!el.contains("comment"))
+                throw new Serialization.InitializableError.ERROR("Does not have \"comment\" member");
 
-            alias = object.get_string_member("alias");
-            comment = object.get_string_member("comment");
+            alias = el.get<Serialization.ValueElement>("alias").as<string>();
+            comment = el.get<Serialization.ValueElement>("comment").as<string>();
         }
     }
 }

@@ -29,18 +29,18 @@ namespace Utaha.DefaultWrapper
         private Subprocess process = null;
         private bool exited = false;
 
-        protected override void init_json(Json.Object object) throws Utaha.Core.JsonableError
+        protected override void _initialize(Utaha.Core.Serialization.TableElement element) throws Utaha.Core.Serialization.InitializableError
         {
-            if (!object.has_member("command"))
-                throw new Utaha.Core.JsonableError.ERROR(@"Does not have \"command\" member");
-            if (object.get_member("command").get_node_type() != Json.NodeType.ARRAY)
-                throw new Utaha.Core.JsonableError.ERROR(@"Member \"command\" is not an array");
+            if (!element.contains("command"))
+                throw new Utaha.Core.Serialization.InitializableError.ERROR(@"Does not have \"command\" member");
+            if (element.get<Utaha.Core.Serialization.Element>("command").get_type() != typeof(Utaha.Core.Serialization.ArrayElement))
+                throw new Utaha.Core.Serialization.InitializableError.ERROR(@"Member \"command\" is not an array");
 
-            var command = object.get_array_member("command");
-            this.command = new string[command.get_length()];
+            var command = element.get<Utaha.Core.Serialization.ArrayElement>("command");
+            this.command = new string[command.length];
 
-            for (uint i = 0; i < command.get_length(); i++)
-                this.command[i] = command.get_string_element(i);
+            for (uint i = 0; i < command.length; i++)
+                this.command[i] = command.get<Utaha.Core.Serialization.ValueElement>(i).as<string>();
 
             last_active = null;
         }
@@ -63,15 +63,13 @@ namespace Utaha.DefaultWrapper
         {
             try
             {
-                var parser = new Json.Parser();
-                parser.load_from_data(node.read_file("wrapper.json"));
-                var object = parser.get_root().get_object();
-                init_json(object);
+                var element = new Utaha.Core.Serialization.JsonReader().read(node.read_file("wrapper.json")) as Utaha.Core.Serialization.TableElement;
+                _initialize(element);
 
-                if (!object.has_member("last_active"))
+                if (!element.contains("last_active"))
                     last_active = null;
                 else
-                    last_active = new DateTime.from_unix_local(object.get_int_member("last_active"));
+                    last_active = new DateTime.from_unix_local(element.get<Utaha.Core.Serialization.ValueElement>("last_active").as<int64?>());
 
                 launcher = new SubprocessLauncher(GLib.SubprocessFlags.NONE);
                 launcher.set_environ(Environ.get());
@@ -80,7 +78,7 @@ namespace Utaha.DefaultWrapper
             } catch (Utaha.Core.StorageNodeError e)
             {
                 throw new Utaha.Core.StorableError.STORAGE_ERROR(e.message);
-            } catch (Utaha.Core.JsonableError e)
+            } catch (Utaha.Core.Serialization.InitializableError e)
             {
                 throw new Utaha.Core.StorableError.ERROR(e.message);
             } catch (Error e)

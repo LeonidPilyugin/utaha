@@ -1,6 +1,6 @@
 namespace Utaha.Core
 {
-    public abstract class Wrapper : Storable, IJsonable
+    public abstract class Wrapper : Storable, Serialization.Initializable
     {
 
         [CCode (has_target = false)]
@@ -79,6 +79,6 @@ namespace Utaha.Core
 
         public abstract HashTable<ProcessSignal?, SignalHandlerMethod> get_signal_handlers();
 
-        protected abstract void init_json(Json.Object object) throws JsonableError;
+        protected abstract void _initialize(Serialization.TableElement element) throws Serialization.InitializableError;
     }
 }

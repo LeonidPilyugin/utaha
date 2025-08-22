@@ -62,7 +62,7 @@ namespace Utaha.Core
                 return data[key];
             }
 
-            public Iterable set<T>(Key key, T value)
+            public new Iterable set<T>(Key key, T value)
                 requires(value is string || value is Iterable)
             {
                 if (value is string)

@@ -107,7 +107,7 @@ namespace Utaha.PosixBackend
             return new BackendStatus(active, pid);
         }
 
-        protected override void init_json(Json.Object object) throws Utaha.Core.JsonableError { }
+        protected override void _initialize(Utaha.Core.Serialization.TableElement element) throws Utaha.Core.Serialization.InitializableError { }
     }
 }
 

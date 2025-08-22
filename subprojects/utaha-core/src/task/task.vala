@@ -1,6 +1,6 @@
 namespace Utaha.Core
 {
-    public sealed class Task : Storable, IJsonable
+    public sealed class Task : Storable, Serialization.Initializable
     {
         public TaskData taskdata { get; private set; }
         public Backend backend { get; private set; }
@@ -108,19 +108,19 @@ namespace Utaha.Core
             );
         }
 
-        protected void init_json(Json.Object object) throws JsonableError
+        protected void _initialize(Serialization.TableElement el) throws Serialization.InitializableError
         {
             string[] members = { "taskdata", "backend", "wrapper" };
             foreach (unowned string member in members)
             {
-                if (!object.has_member(member))
-                    throw new JsonableError.ERROR(@"Does not have \"$member\" member");
-                if (object.get_member(member).get_node_type() != Json.NodeType.OBJECT)
-                    throw new JsonableError.ERROR(@"Member \"$member\" does not contain object");
+                if (!el.contains(member))
+                    throw new Serialization.InitializableError.ERROR(@"Does not have \"$member\" member");
+                if (el.get<Serialization.Element>(member).get_type() != typeof(Serialization.TableElement))
+                    throw new Serialization.InitializableError.ERROR(@"Member \"$member\" does not contain object");
             }
-            taskdata = IJsonable.load_json<TaskData>(object.get_member("taskdata").get_object());
-            backend = IJsonable.load_json<Backend>(object.get_member("backend").get_object());
-            wrapper = IJsonable.load_json<Wrapper>(object.get_member("wrapper").get_object());
+            taskdata = Serialization.Initializable.initialize<TaskData>(el["taskdata"]);
+            backend = Serialization.Initializable.initialize<Backend>(el["backend"]);
+            wrapper = Serialization.Initializable.initialize<Wrapper>(el["wrapper"]);
         }
     }
 }

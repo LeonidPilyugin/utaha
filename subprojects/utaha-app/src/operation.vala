@@ -1,16 +1,28 @@
 namespace Utaha.App
 {
-    public class Operation : Object
+    public class Operation
     {
-        private delegate void OperationFunc (Utaha.Core.Task task) throws OperationError;
+        private struct Data
+        {
+            uint * count;
+            Formatter formatter;
+        }
+
+        private Data data;
+
+        [CCode (has_target = false)] // Memory leak otherwise (T_T)
+        private delegate void OperationFunc (Utaha.Core.Task task, Data data) throws OperationError;
 
         private OperationFunc operation;
 
-        private Operation() { }
+        private Operation(OperationFunc f)
+        {
+            operation = f;
+        }
 
         public Operation.start()
         {
-            this.operation = (task) => {
+            operation = (task, data) => {
                 try
                 {
                     task.start();
@@ -23,7 +35,7 @@ namespace Utaha.App
 
         public Operation.stop()
         {
-            this.operation = (task) => {
+            operation = (task, data) => {
                 try
                 {
                     task.stop();
@@ -39,7 +51,7 @@ namespace Utaha.App
 
         public Operation.remove()
         {
-            this.operation = (task) => {
+            operation = (task, data) => {
                 try
                 {
                     task.destroy();
@@ -58,10 +70,11 @@ namespace Utaha.App
 
         public Operation.status(Formatter formatter)
         {
-            this.operation = (task) => {
+            data.formatter = formatter;
+            operation = (task, data) => {
                 try
                 {
-                    formatter.print_status(task.status());
+                    data.formatter.print_status(task.status());
                 } catch (Utaha.Core.BackendError e)
                 {
                     throw new OperationError.ERROR(e.message);
@@ -71,22 +84,23 @@ namespace Utaha.App
 
         public Operation.list()
         {
-            this.operation = (task) => {
+            operation = (task, data) => {
                 stdout.printf(@"$(task.taskdata.id.uuid): $(task.taskdata.alias)\n");
             };
         }
 
         public Operation.count(uint * count)
         {
+            data.count = count;
             *count = 0;
-            this.operation = (task) => {
-                *count += 1;
+            operation = (task, data) => {
+                *data.count += 1;
             };
         }
 
         public void perform(Utaha.Core.Task task) throws OperationError
         {
-            this.operation(task);
+            operation(task, data);
         }
 
         public void try_perform(Utaha.Core.Task task)

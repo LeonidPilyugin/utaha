@@ -100,9 +100,9 @@ namespace Utaha.App
         {
             try
             {
-                var parser = new Json.Parser();
-                parser.load_from_file(path);
-                var task = Utaha.Core.IJsonable.load_json<Utaha.Core.Task>(parser.get_root().get_object());
+                var task = Utaha.Core.Serialization.Initializable.initialize<Utaha.Core.Task>(
+                    new Utaha.Core.Serialization.JsonReader().read_file(path)
+                );
 
                 task.node = Utaha.Core.Storage.get_storage().create_node(task.taskdata.id);
                 task.init();

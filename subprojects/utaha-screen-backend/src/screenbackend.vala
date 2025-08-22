@@ -133,7 +133,7 @@ namespace Utaha.ScreenBackend
             return new BackendStatus(session.get_pid() != null, session.get_pid(), id);
         }
 
-        protected override void init_json(Json.Object object) throws Utaha.Core.JsonableError { }
+        protected override void _initialize(Utaha.Core.Serialization.TableElement element) throws Utaha.Core.Serialization.InitializableError { }
     }
 }
 

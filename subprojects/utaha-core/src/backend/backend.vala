@@ -1,6 +1,6 @@
 namespace Utaha.Core
 {
-    public abstract class Backend : Storable, IJsonable
+    public abstract class Backend : Storable, Serialization.Initializable
     {
         // public abstract BackendHealthReport healthcheck();
 
@@ -25,6 +25,6 @@ namespace Utaha.Core
 
         public abstract BackendStatus status() throws BackendError;
 
-        protected abstract void init_json(Json.Object object) throws JsonableError;
+        protected abstract void _initialize(Serialization.TableElement element) throws Serialization.InitializableError;
     }
 }

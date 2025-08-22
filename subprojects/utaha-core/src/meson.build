@@ -1,7 +1,4 @@
-sources = files(
-  'jsonable.vala',
-)
-
+sources = files()
 subdir('backend')
 subdir('id')
 subdir('module')
@@ -9,3 +6,4 @@ subdir('status')
 subdir('storage')
 subdir('task')
 subdir('wrapper')
+subdir('serialization')

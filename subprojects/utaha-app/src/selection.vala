@@ -33,7 +33,7 @@ namespace Utaha.App
 
             public bool valid { get { return task != null; } }
 
-            public Utaha.Core.Task get()
+            public new Utaha.Core.Task get()
             {
                 return task;
             }
