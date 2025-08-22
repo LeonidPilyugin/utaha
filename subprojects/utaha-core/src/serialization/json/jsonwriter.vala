@@ -45,7 +45,28 @@ namespace Utaha.Core.Serialization
                     iter(ee.get<Element>(key), b);
                 }
                 b.end_object();
-            } else { assert_not_reached(); }
+            } else if (typeof(ValueElement) == t)
+            {
+                var ee = e as ValueElement;
+                Type tt = ee.gtype;
+                if (typeof(int64?) == tt)
+                {
+                    b.add_int_value(ee.as<int64?>());
+                } else if (typeof(int?) == tt)
+                {
+                    b.add_int_value((int64) ee.as<int?>());
+                } else if (typeof(long?) == tt)
+                {
+                    b.add_int_value((int64) ee.as<long?>());
+                } else if (typeof(string) == tt)
+                {
+                    b.add_string_value(ee.as<string>());
+                } else if (typeof(bool?) == tt)
+                {
+                    b.add_boolean_value(ee.as<bool?>());
+                } else { assert_not_reached(); }
+            }
+            else { assert_not_reached(); }
         }
     }
 }

@@ -9,6 +9,8 @@ namespace Utaha.Core.Serialization
             value = v;
         }
 
+        public Type gtype { get { return value.type(); } }
+
         public G as<G>()
         {
             Type t = typeof(G);
@@ -25,6 +27,9 @@ namespace Utaha.Core.Serialization
             } else if (typeof(string) == t)
             {
                 return value.get_string();
+            } else if (typeof(bool?) == t)
+            {
+                return value.get_boolean();
             }
 
             assert_not_reached();
