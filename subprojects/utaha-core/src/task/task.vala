@@ -155,7 +155,7 @@ namespace Utaha.Core
                     return true;
                 }
 
-                return false;
+                return job.is_finished();
             } catch (StorageNodeError e)
             {
                 assert_not_reached();

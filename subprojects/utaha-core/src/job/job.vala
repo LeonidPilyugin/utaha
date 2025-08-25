@@ -9,5 +9,7 @@ namespace Utaha.Core
         public abstract JobStatus status();
 
         protected abstract void _initialize(Serialization.TableElement element) throws Serialization.InitializableError;
+
+        public abstract bool is_finished();
     }
 }

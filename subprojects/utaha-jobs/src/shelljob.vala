@@ -27,7 +27,12 @@ namespace Utaha.Jobs
         private DateTime? last_active = null;
         private SubprocessLauncher launcher = null;
         private Subprocess process = null;
-        private bool exited = false;
+        private bool finished = false;
+
+        public override bool is_finished()
+        {
+            return finished;
+        }
 
         public async override void start()
         {
@@ -35,7 +40,7 @@ namespace Utaha.Jobs
             {
                 process = launcher.spawnv(command);
                 yield process.wait_async();
-                exited = true;
+                finished = true;
             } catch (Error e)
             {
                 assert_not_reached();
@@ -45,7 +50,7 @@ namespace Utaha.Jobs
         public override void stop()
         {
             process.force_exit();
-            exited = true;
+            finished = true;
         }
 
         public override Utaha.Core.JobStatus status()
@@ -149,6 +154,3 @@ namespace Utaha.Jobs
         }
     }
 }
-
-[ModuleInit]
-public static void plugin_init(GLib.TypeModule type_module) { }
