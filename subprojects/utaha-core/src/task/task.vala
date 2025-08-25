@@ -4,14 +4,14 @@ namespace Utaha.Core
     {
         public TaskData taskdata { get; private set; }
         public Backend backend { get; private set; }
-        public Wrapper wrapper { get; private set; }
+        public Job job { get; private set; }
         private StorageNode? _node;
 
         public Task()
         {
             taskdata = null;
             backend = null;
-            wrapper = null;
+            job = null;
             node = null;
         }
 
@@ -25,10 +25,10 @@ namespace Utaha.Core
                     _node = value;
                     if (taskdata != null) taskdata.node = node == null ? null : node.subnode("taskdata");
                     if (backend != null) backend.node = node == null ? null : node.subnode("backend");
-                    if (wrapper != null) wrapper.node = node == null ? null : node.subnode("wrapper");
+                    if (job != null) job.node = node == null ? null : node.subnode("job");
                 } catch (StorageNodeError e)
                 {
-                    error(@"Unexpected error: $(e.message)");
+                    assert_not_reached();
                 }
             }
         }
@@ -37,7 +37,7 @@ namespace Utaha.Core
         {
             base.init();
             backend.init();
-            wrapper.init();
+            job.init();
             taskdata.init();
         }
 
@@ -46,7 +46,7 @@ namespace Utaha.Core
             try
             {
                 backend = Storable.load_from<Backend>(node.subnode("backend"));
-                wrapper = Storable.load_from<Wrapper>(node.subnode("wrapper"));
+                job = Storable.load_from<Job>(node.subnode("job"));
                 taskdata = Storable.load_from<TaskData>(node.subnode("taskdata"));
             } catch (StorageNodeError e)
             {
@@ -57,7 +57,7 @@ namespace Utaha.Core
         public override void dump() throws StorableError
         {
             backend.dump();
-            wrapper.dump();
+            job.dump();
             taskdata.dump();
             base.dump();
         }
@@ -75,7 +75,7 @@ namespace Utaha.Core
         {
             if (!backend.status().active)
                 throw new TaskError.ERROR(@"Task $(taskdata.id.uuid) is not active");
-            wrapper.query_stop();
+            query_stop();
         }
 
         public void destroy() throws BackendError, StorableError, TaskError
@@ -88,7 +88,7 @@ namespace Utaha.Core
         public override void remove() throws StorableError
         {
             backend.remove();
-            wrapper.remove();
+            job.remove();
             taskdata.remove();
             base.remove();
         }
@@ -101,16 +101,14 @@ namespace Utaha.Core
                     return backend.status();
                 },
                 () => {
-                    return wrapper.status();
-                },
-                wrapper.stdout_path,
-                wrapper.stderr_path
+                    return job.status();
+                }
             );
         }
 
         protected void _initialize(Serialization.TableElement el) throws Serialization.InitializableError
         {
-            string[] members = { "taskdata", "backend", "wrapper" };
+            string[] members = { "taskdata", "backend", "job" };
             foreach (unowned string member in members)
             {
                 if (!el.contains(member))
@@ -120,7 +118,48 @@ namespace Utaha.Core
             }
             taskdata = Serialization.Initializable.initialize<TaskData>(el["taskdata"]);
             backend = Serialization.Initializable.initialize<Backend>(el["backend"]);
-            wrapper = Serialization.Initializable.initialize<Wrapper>(el["wrapper"]);
+            job = Serialization.Initializable.initialize<Job>(el["job"]);
+        }
+
+        public async void daemon_start() throws TaskError
+        {
+            yield job.start();
+        }
+
+        public void daemon_stop()
+        {
+            job.stop();
+        }
+
+        private void query_stop()
+        {
+            try
+            {
+                node.touch_file("stop");
+                while (node.read_file("stop") != "ack") Thread.usleep(100000);
+                node.remove_file("stop");
+            } catch (StorageNodeError e)
+            {
+                assert_not_reached();
+            }
+        }
+
+        public bool on_tick()
+        {
+            try
+            {
+                if (node.file_exists("stop"))
+                {
+                    job.stop();
+                    node.write_file("stop", "ack");
+                    return true;
+                }
+
+                return false;
+            } catch (StorageNodeError e)
+            {
+                assert_not_reached();
+            }
         }
     }
 }

@@ -17,9 +17,9 @@ add_global_arguments(
 subprojects = [
   [ 'utaha-core', { } ],
   [ 'utaha-app', { } ],
-  [ 'utaha-default-wrapper', { } ],
   [ 'utaha-screen-backend', { } ],
   [ 'utaha-posix-backend', { } ],
+  [ 'utaha-jobs', { } ],
 ]
 
 subproject_objects = [ ]

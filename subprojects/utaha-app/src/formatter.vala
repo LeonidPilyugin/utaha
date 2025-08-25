@@ -48,9 +48,9 @@ namespace Utaha.App
             } else
             {
                 line += "\x1b[31minactive\x1b[0m";
-                if (status.wrapper_status.value.last_active != null)
+                if (status.job_status.value.last_active != null)
                 {
-                    var d = status.wrapper_status.value.last_active;
+                    var d = status.job_status.value.last_active;
                     line += @" since $(d.format(date_format)) (";
                     line += @"$(difference(d)) ago)";
                 }
@@ -80,13 +80,13 @@ namespace Utaha.App
         private void print_stdout(Utaha.Core.TaskStatus status) throws FormatterError
         {
             print("stdout:", offset);
-            print(tail_file(tail_lines, status.stdout_path), 2 * offset);
+            // print(tail_file(tail_lines, status.stdout_path), 2 * offset);
         }
 
         private void print_stderr(Utaha.Core.TaskStatus status) throws FormatterError
         {
             print("stderr:", offset);
-            print(tail_file(tail_lines, status.stderr_path), 2 * offset);
+            // print(tail_file(tail_lines, status.stderr_path), 2 * offset);
         }
 
         // private void print_backend_status(Utaha.Core.TaskStatus status)

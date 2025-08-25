@@ -3,37 +3,27 @@ errordomain Error
     ERROR,
 }
 
-
 static MainLoop loop = null;
 static Utaha.Core.Task task = null;
-static HashTable<ProcessSignal?, Utaha.Core.Wrapper.SignalHandlerMethod> handlers;
 
 static void register_signals()
 {
-    handlers = task.wrapper.get_signal_handlers();
-    foreach (ProcessSignal? sig in handlers.get_keys())
-        Process.signal(sig, on_signal);
+    Process.signal(
+        ProcessSignal.HUP,
+        (s) => { }
+    );
+    Process.signal(
+        ProcessSignal.TERM,
+        (s) => {
+            task.daemon_stop();
+        }
+    );
 }
 
 static bool timer_callback()
 {
-    try
-    {
-        if (task.wrapper.on_tick()) loop.quit();
-    } catch (Utaha.Core.WrapperError e)
-    {
-        error(e.message);
-    }
+    if (task.on_tick()) loop.quit();
     return true;
-}
-
-static void on_signal(int signal)
-{
-    if (handlers.contains(signal))
-    {
-        var func = handlers.get(signal);
-        if (null != func) func(task.wrapper, signal);
-    }
 }
 
 static void run(Utaha.Core.Id id, int delay = 100)
@@ -54,7 +44,7 @@ static void run(Utaha.Core.Id id, int delay = 100)
     var time = new TimeoutSource(delay);
     time.set_callback(timer_callback);
     time.attach(loop.get_context());
-    task.wrapper.start.begin();
+    task.daemon_start.begin();
     loop.run();
 }
 

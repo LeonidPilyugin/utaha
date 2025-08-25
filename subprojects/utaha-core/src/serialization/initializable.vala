@@ -1,11 +1,5 @@
 namespace Utaha.Core.Serialization
 {
-    public errordomain InitializableError
-    {
-        TYPE_ERROR,
-        ERROR,
-    }
-
     public interface Initializable : Object
     {
         public static T initialize<T>(Element element) throws InitializableError

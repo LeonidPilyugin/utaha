@@ -4,23 +4,17 @@ namespace Utaha.Core
     {
         public TaskData taskdata { get; private set; }
         public Gee.Lazy<BackendStatus> backend_status { get; private set; }
-        public Gee.Lazy<WrapperStatus> wrapper_status { get; private set; }
-        public string stdout_path { get; private set; }
-        public string stderr_path { get; private set; }
+        public Gee.Lazy<JobStatus> job_status { get; private set; }
 
         internal TaskStatus(
             TaskData taskdata,
             Gee.LazyFunc<BackendStatus> backend_status,
-            Gee.LazyFunc<WrapperStatus> wrapper_status,
-            string stdout_path,
-            string stderr_path
+            Gee.LazyFunc<JobStatus> job_status
         )
         {
             this.taskdata = taskdata;
             this.backend_status = new Gee.Lazy<BackendStatus>(backend_status);
-            this.wrapper_status = new Gee.Lazy<WrapperStatus>(wrapper_status);
-            this.stderr_path = stderr_path;
-            this.stdout_path = stdout_path;
+            this.job_status = new Gee.Lazy<JobStatus>(job_status);
         }
 
         public override Iterable iter
@@ -29,7 +23,7 @@ namespace Utaha.Core
             {
                 return base.iter
                     .set<Status.Iterable>(new Status.Iterable.Key.str("backend"), backend_status.value.iter)
-                    .set<Status.Iterable>(new Status.Iterable.Key.str("wrapper"), wrapper_status.value.iter);
+                    .set<Status.Iterable>(new Status.Iterable.Key.str("job"), job_status.value.iter);
             }
         }
     }
