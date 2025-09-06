@@ -53,22 +53,25 @@ namespace Utaha.App
 
         public void perform_operation() throws ApplicationError
         {
+            Operation op;
             if (options.start)
-                @foreach(new Operation.start());
+                op = new StartOperation();
             else if (options.stop)
-                @foreach(new Operation.stop());
+                op = new StopOperation();
             else if (options.remove)
-                @foreach(new Operation.remove());
+                op = new RemoveOperation();
             else if (options.status)
-                @foreach(new Operation.status(formatter));
+                op = new StatusOperation();
             else if (options.list)
-                @foreach(new Operation.list());
+                op = new ListOperation();
             else if (options.count)
-            {
-                uint count = 0;
-                @foreach(new Operation.count(&count));
-                stdout.printf(@"$count\n");
-            }
+                op = new CountOperation();
+            else
+                assert_not_reached();
+
+            @foreach(op);
+
+            stdout.printf(op.print());
         }
 
         public void set_selectors()

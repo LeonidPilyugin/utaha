@@ -3,10 +3,11 @@ sources = files(
   'applicationerror.vala',
   'formatter.vala',
   'formattererror.vala',
-  'operation.vala',
-  'operationerror.vala',
+  'formattererror.vala',
   'optionsparser.vala',
   'selection.vala',
   'selector.vala',
   'version.vala',
 )
+
+subdir('operation')
