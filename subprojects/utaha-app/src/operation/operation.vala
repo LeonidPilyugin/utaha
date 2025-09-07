@@ -10,9 +10,31 @@ namespace Utaha.App
             catch (OperationError e) { printerr(e.message); }
         }
 
-        public virtual string print()
+        public abstract class Result
         {
-            return "";
+            public Formatter formatter;
+
+            protected abstract void format();
+
+            public string to_string()
+            {
+                if (null != formatter)
+                    format();
+                return null == formatter ? "" : formatter.compile();
+            }
+        }
+
+        public class EmptyResult : Result
+        {
+            protected override void format() { }
+        }
+
+        public virtual Result result
+        {
+            owned get
+            {
+                return new EmptyResult();
+            }
         }
     }
 }

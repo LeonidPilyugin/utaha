@@ -1,6 +1,7 @@
 sources = files(
   'application.vala',
   'applicationerror.vala',
+  'defaultformatter.vala',
   'formatter.vala',
   'formattererror.vala',
   'formattererror.vala',

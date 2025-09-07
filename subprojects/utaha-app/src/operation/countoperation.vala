@@ -9,9 +9,29 @@ namespace Utaha.App
             counter++;
         }
 
-        public override string print()
+        class Result : Operation.Result
         {
-            return @"$counter\n";
+            private uint counter;
+
+            public Result(uint counter)
+            {
+                this.counter = counter;
+            }
+
+            protected override void format()
+            {
+                assert(null != formatter);
+                formatter.put<string>(counter.to_string());
+                formatter.put<Formatter.Symbol>(Formatter.Symbol.NEW_LINE);
+            }
+        }
+
+        public override Operation.Result result
+        {
+            owned get
+            {
+                return new Result(counter);
+            }
         }
     }
 }

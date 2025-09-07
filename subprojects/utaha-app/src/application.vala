@@ -9,7 +9,7 @@ namespace Utaha.App
         public Application()
         {
             selection = new Selection(Utaha.Core.Storage.get_storage().iterator());
-            formatter = new Formatter();
+            formatter = new DefaultFormatter();
         }
 
         public void load_modules() throws ApplicationError
@@ -71,7 +71,9 @@ namespace Utaha.App
 
             @foreach(op);
 
-            stdout.printf(op.print());
+            Operation.Result res = op.result;
+            res.formatter = formatter;
+            stdout.printf(res.to_string());
         }
 
         public void set_selectors()

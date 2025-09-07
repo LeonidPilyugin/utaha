@@ -41,7 +41,7 @@ namespace Utaha.Jobs
         public override void stop()
         {
             foreach (var j in jobs)
-                j.stop();
+                if (!j.is_finished()) j.stop();
         }
 
         public override Utaha.Core.JobStatus status()

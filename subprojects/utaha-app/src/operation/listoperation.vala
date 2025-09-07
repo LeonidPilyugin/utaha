@@ -9,14 +9,36 @@ namespace Utaha.App
             tasks.append(task);
         }
 
-        public override string print()
+        class Result : Operation.Result
         {
-            string result = "";
+            private unowned List<Utaha.Core.Task> tasks;
 
-            foreach (var t in tasks)
-                result = @"$result$(t.taskdata.id.uuid)\n";
+            public Result(List<Utaha.Core.Task> tasks)
+            {
+                this.tasks = tasks;
+            }
 
-            return result;
+            protected override void format()
+            {
+                assert(null != formatter);
+                foreach (var t in tasks)
+                {
+                    formatter.put<string>(t.taskdata.id.uuid);
+                    formatter.put<Formatter.Symbol>(Formatter.Symbol.SPACE);
+                    formatter.put<Formatter.Symbol>(Formatter.Symbol.LEFT_ARROW);
+                    formatter.put<Formatter.Symbol>(Formatter.Symbol.SPACE);
+                    formatter.put<string>(t.taskdata.alias);
+                    formatter.put<Formatter.Symbol>(Formatter.Symbol.NEW_LINE);
+                }
+            }
+        }
+
+        public override Operation.Result result
+        {
+            owned get
+            {
+                return new Result(tasks);
+            }
         }
     }
 }

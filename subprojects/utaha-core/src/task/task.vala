@@ -97,12 +97,8 @@ namespace Utaha.Core
         {
             return new TaskStatus(
                 taskdata,
-                () => {
-                    return backend.status();
-                },
-                () => {
-                    return job.status();
-                }
+                backend.status(),
+                job.status()
             );
         }
 
