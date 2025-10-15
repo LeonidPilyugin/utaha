@@ -74,6 +74,7 @@ namespace Utaha.App
                     );
                 }
                 formatter.put<Formatter.Symbol>(Formatter.Symbol.NEW_LINE);
+                formatter.indent -= 4;
             }
 
             protected override void format()
